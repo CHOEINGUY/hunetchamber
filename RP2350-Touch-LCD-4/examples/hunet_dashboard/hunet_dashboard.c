@@ -194,17 +194,17 @@ static void create_dashboard(void) {
 static void update_labels(const SensorData *d) {
     char buf[32];
 
-    snprintf(buf, sizeof(buf), "%.1fC",    d->air_temp);  lv_label_set_text(val_air_temp,  buf);
-    snprintf(buf, sizeof(buf), "%.1f%%",   d->humidity);  lv_label_set_text(val_humidity,   buf);
-    snprintf(buf, sizeof(buf), "%dW/m2",   d->solar);     lv_label_set_text(val_solar,      buf);
-    snprintf(buf, sizeof(buf), "%.1f%%",   d->moisture);  lv_label_set_text(val_moisture,  buf);
-    snprintf(buf, sizeof(buf), "%.1fC",    d->soil_temp); lv_label_set_text(val_soil_temp, buf);
-    snprintf(buf, sizeof(buf), "%dppm",    d->co2);       lv_label_set_text(val_co2,       buf);
-    snprintf(buf, sizeof(buf), "%duS/cm",  d->ec);        lv_label_set_text(val_ec,        buf);
+    snprintf(buf, sizeof(buf), "%.1f C",    d->air_temp);  lv_label_set_text(val_air_temp,  buf);
+    snprintf(buf, sizeof(buf), "%.1f %%",  d->humidity);  lv_label_set_text(val_humidity,   buf);
+    snprintf(buf, sizeof(buf), "%d W/m2",  d->solar);     lv_label_set_text(val_solar,      buf);
+    snprintf(buf, sizeof(buf), "%.1f %%",  d->moisture);  lv_label_set_text(val_moisture,  buf);
+    snprintf(buf, sizeof(buf), "%.1f C",   d->soil_temp); lv_label_set_text(val_soil_temp, buf);
+    snprintf(buf, sizeof(buf), "%d ppm",   d->co2);       lv_label_set_text(val_co2,       buf);
+    snprintf(buf, sizeof(buf), "%d uS/cm", d->ec);        lv_label_set_text(val_ec,        buf);
     snprintf(buf, sizeof(buf), "%.1f",     d->ph);        lv_label_set_text(val_ph,        buf);
-    snprintf(buf, sizeof(buf), "%d",       d->n);         lv_label_set_text(val_n,         buf);
-    snprintf(buf, sizeof(buf), "%d",       d->p);         lv_label_set_text(val_p,         buf);
-    snprintf(buf, sizeof(buf), "%d",       d->k);         lv_label_set_text(val_k,         buf);
+    snprintf(buf, sizeof(buf), "%d mg/kg", d->n);         lv_label_set_text(val_n,         buf);
+    snprintf(buf, sizeof(buf), "%d mg/kg", d->p);         lv_label_set_text(val_p,         buf);
+    snprintf(buf, sizeof(buf), "%d mg/kg", d->k);         lv_label_set_text(val_k,         buf);
 
     lv_label_set_text(val_relay, d->relay ? "ON" : "OFF");
     lv_obj_set_style_text_color(val_relay,
