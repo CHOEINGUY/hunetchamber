@@ -3,6 +3,7 @@
 작성일: 2026-04-29
 
 이 문서는 나중에 다시 이어서 작업할 때 현재 상태를 바로 파악하기 위한 정리본이다.
+논의 과정과 의사결정 근거는 `docs/RESEARCH_LOG.md`에 별도 정리한다.
 
 ## 한 줄 요약
 
@@ -13,6 +14,8 @@ Seeed XIAO RP2040 / Pico Zero가 RS485 센서 4종을 읽고, USR-ES1(W5500) Eth
 ```text
 RS485 sensors -> Pico -> W5500 Ethernet -> Mac gateway -> MariaDB
 ```
+
+2026-04-30 추가: 일반 Raspberry Pi Pico 버전과 RP2350 Touch LCD 4 시각화 버전을 별도 구조로 분리했다. 일반 Pico 버전은 W5500 모듈 손상 의심으로 네트워크는 임시 비활성화했다. RP2350 연동은 최종적으로 Pico 쪽 TTL-to-RS485 모듈을 추가해 `RS485 sensors -> Pico -> TTL-to-RS485 -> RP2350 RS485 A/B` 구조로 표시/터치 릴레이를 구현하는 방향으로 확정했다. 현재 TTL-to-RS485 모듈이 없으므로 RP2350은 WAIT 상태가 정상이다.
 
 ## 현재 성공 상태
 
@@ -415,6 +418,8 @@ CO2: 6초마다 새로 읽고 나머지는 직전값 재사용
 | 파일 | 역할 |
 |---|---|
 | `firmware/rp2040_main.py` | 현재 보드에 올라가는 통합 펌웨어 |
+| `firmware/xiao/main.py` | Seeed XIAO RP2040용 펌웨어 |
+| `firmware/pico/main.py` | Raspberry Pi Pico 일반 보드용 펌웨어 |
 | `firmware/check_rs485_sensors.py` | RS485 센서 4종 확인 |
 | `firmware/test_http_post.py` | W5500 HTTP POST 단독 테스트 |
 | `firmware/probe_w5500_spi.py` | W5500 SPI 모드/속도 프로브 |
@@ -423,9 +428,122 @@ CO2: 6초마다 새로 읽고 나머지는 직전값 재사용
 | `gateway_server.py` | 맥 게이트웨이, DB 저장, 대시보드 |
 | `scripts/setup_sensor_db.py` | MariaDB 테이블 생성 |
 | `docs/PINMAP_W5500.md` | W5500 핀맵 |
+| `docs/PINMAP_XIAO.md` | Seeed XIAO RP2040 전체 핀맵 |
+| `docs/PINMAP_PICO.md` | Raspberry Pi Pico 일반 보드 전체 핀맵 |
 | `docs/W5500_DEBUG_STATUS.md` | W5500 디버그 기록 |
 | `docs/DEVLOG.md` | 누적 개발 로그 |
 | `docs/PROJECT_HANDOFF_LOG.md` | 현재 정리 문서 |
+
+## 2026-04-30 추가 상태: 일반 Pico + RP2350 Touch LCD 4
+
+### 폴더 구조
+
+```text
+firmware/
+  xiao/main.py       # Seeed XIAO RP2040 버전
+  pico/main.py       # Raspberry Pi Pico 일반 버전
+  lib/               # W5500 공용 라이브러리
+  tests/             # 테스트 스크립트
+  legacy/            # 예전 개별 센서 스크립트
+
+RP2350-Touch-LCD-4/examples/
+  hunet_xiao/        # XIAO 시절 대시보드
+  hunet_pico/        # 일반 Pico용 대시보드
+```
+
+### 일반 Pico 현재 목적
+
+W5500 모듈이 과전압/전원 문제로 손상 의심 상태라, 일반 Pico 버전에서는 네트워크 코드를 일단 비활성화했다. 현재 테스트 목표는 다음 흐름이다.
+
+```text
+RS485 sensors -> Raspberry Pi Pico -> UART -> RP2350 Touch LCD 4
+```
+
+RP2350 LCD에서는 센서값을 표시하고, Relay 카드를 터치하면 Pico로 릴레이 명령을 돌려준다.
+
+### 일반 Pico ↔ RP2350 통신
+
+최종 선택은 RS485다. Pico 코드에서는 UART1 GP4/GP5를 사용하지만, RP2350의 외부 단자는 TTL UART가 아니라 RS485 A/B이므로 Pico 쪽에 TTL-to-RS485 모듈이 반드시 필요하다. I2C 방식은 RP2350의 터치 패널 I2C와 충돌하므로 임시 표시 전용 버전도 만들지 않기로 했다.
+
+```text
+Pico GP4 / UART1 TX -> TTL-to-RS485 DI
+Pico GP5 / UART1 RX <- TTL-to-RS485 RO
+TTL-to-RS485 A      -> RP2350 RS485 A
+TTL-to-RS485 B      -> RP2350 RS485 B
+GND 공통
+Baudrate: 115200
+```
+
+프로토콜:
+
+```text
+Pico -> RP2350:
+air_temp,humidity,moisture,soil_temp,ec,ph,n,p,k,solar,co2,relay\n
+
+RP2350 -> Pico:
+1 byte relay command
+0x00 = OFF
+0x01 = ON
+```
+
+중요 주의:
+
+```text
+Pico GP4/GP5 UART를 RP2350 RS485 A/B에 직접 꽂으면 안 된다.
+TTL-to-RS485 모듈이 올 때까지 LCD 연동은 테스트 보류이며 WAIT 상태가 정상이다.
+```
+
+### 완료된 코드/빌드 상태
+
+```text
+firmware/pico/main.py
+```
+
+- RS485 센서 4종 읽기 정상
+- UART1 GP4/GP5로 TTL-to-RS485 모듈에 CSV 전송
+- RP2350에서 받은 1바이트 명령으로 GP2 릴레이 제어
+- W5500 네트워크 코드는 새 W5500 교체 전까지 비활성화
+
+```text
+RP2350-Touch-LCD-4/examples/hunet_pico/hunet_pico.c
+```
+
+- 온보드 RS485 포트 뒤의 UART1 GP8/GP9로 Pico CSV 수신
+- I2C1 GP6/GP7은 터치 패널용으로 유지
+- Relay 카드 터치 시 `g_relay_cmd` 토글
+- 다음 센서 CSV 수신 때 현재 릴레이 명령을 Pico로 1바이트 응답
+
+빌드 확인:
+
+```bash
+cd /Users/choeingyumac/Hunet/RP2350-Touch-LCD-4/build
+make hunet_pico -j8
+```
+
+결과:
+
+```text
+[100%] Built target hunet_pico
+```
+
+UF2:
+
+```text
+/Users/choeingyumac/Hunet/RP2350-Touch-LCD-4/build/examples/hunet_pico/hunet_pico.uf2
+```
+
+Pico 업로드 완료:
+
+```text
+python3 upload.py firmware/pico/main.py
+```
+
+### 다음 확인 항목
+
+1. TTL-to-RS485 모듈을 추가 확보한다.
+2. Pico GP4/GP5와 TTL-to-RS485 모듈, RP2350 RS485 A/B를 연결한다.
+3. LCD 데이터 표시와 터치 릴레이 제어를 확인한다.
+4. 새 W5500 모듈이 오면 일반 Pico W5500 SPI부터 재검증한다.
 
 ## 현재 떠 있는 서비스 확인
 

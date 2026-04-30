@@ -1,6 +1,336 @@
 # Hunet 개발 로그
 
 현재 상태를 한 번에 파악하려면 먼저 `docs/PROJECT_HANDOFF_LOG.md`를 본다.
+논의 과정과 의사결정 흐름은 `docs/RESEARCH_LOG.md`에 따로 정리한다.
+
+---
+
+### 후속 개선 — 릴레이 터치 반응 속도 향상 (Decoupling)
+
+기존에는 Pico가 센서 4개를 다 읽은 후(약 2초)에만 RP2350으로 데이터를 보내고 릴레이 명령을 받아왔기 때문에, 터치 후 반응이 최대 2초까지 지연되었다. 이를 해결하기 위해 폴링 구조를 개선했다.
+
+개선 내용:
+
+1. **RP2350 디스플레이 (C)**:
+   - UART RX IRQ 핸들러에 `'?'` 단일 바이트 폴링 요청 처리 추가
+   - `'?'` 수신 시 현재 릴레이 상태(`g_relay_cmd`)를 즉시 응답
+
+2. **Pico 펌웨어 (Python)**:
+   - `check_display_command()` 함수 구현: `'?'`를 보내고 응답을 받아 릴레이 제어
+   - 메인 루프 내 센서 읽기 사이사이에 `check_display_command()`를 배치
+   - 결과적으로 터치 반응 속도가 0.3~0.5초 이내로 대폭 향상됨
+
+수정 파일:
+
+- `RP2350-Touch-LCD-4/examples/hunet_pico/hunet_pico.c`
+- `firmware/pico/main.py`
+
+결과:
+
+- 센서 읽기 중에도 실시간에 가까운 릴레이 제어 가능 확인
+- 전체 루프 주기는 유지하면서 제어 레이턴시만 선택적 축소
+
+---
+
+## 2026-04-30 (Pico 일반 + RP2350 터치 릴레이 구조 정리)
+
+
+### 후속 확인 — WAIT 상태와 통신 경로 분리
+
+RP2350에 `hunet_pico.uf2`를 올리고 Pico에 `firmware/pico/main.py`를 업로드했다. 현재 TTL-to-RS485 모듈이 없으므로 RP2350 화면은 `WAIT` 상태가 정상이다. 이 `WAIT`는 Pico가 센서를 못 읽는다는 뜻이 아니라, Pico에서 RP2350으로 가는 표시/명령용 RS485 경로가 아직 없다는 뜻이다.
+
+현재 통신 경로는 다음 세 가지로 분리해서 관리한다.
+
+```text
+1. 센서 데이터 수집
+   RS485 센서들 -> 센서용 RS485-TTL 모듈 -> Pico UART0 GP0/GP1
+
+2. RP2350 터치 입력
+   RP2350 터치 패널 -> RP2350 내부 I2C1 GP6/GP7
+
+3. Pico-RP2350 화면/명령 연동
+   Pico UART1 GP4/GP5 -> 추가 TTL-to-RS485 모듈 -> RP2350 RS485 A/B
+```
+
+따라서 TTL-to-RS485 모듈이 오기 전까지 가능한 것과 불가능한 것을 다음처럼 정리했다.
+
+| 항목 | 현재 가능 여부 | 설명 |
+|---|---|---|
+| RP2350 대시보드 부팅 | 가능 | `hunet_pico.uf2`가 정상 플래시됨 |
+| RP2350 터치 UI 표시 | 가능 | 터치는 RP2350 내부 I2C로 동작 |
+| Pico 센서 읽기 | 가능 | 센서 전원/센서용 RS485 모듈이 연결되면 독립적으로 동작 |
+| RP2350 화면 센서값 표시 | 불가 | Pico-RP2350 RS485 통신선이 아직 없음 |
+| RP2350 터치로 Pico 릴레이 제어 | 불가 | 명령 회신 경로가 아직 없음 |
+
+정리된 핀맵은 `docs/PINMAP_PICO.md`에 반영했다. `RP2350` 뒤쪽 `SDA/SCL`은 터치와 같은 I2C 계열이라 Pico 일반 버전에서는 사용하지 않는다. `5V/3V3`은 전원 핀이고, `CAN L/H`는 CAN 차동 단자이므로 UART/RS485 대체 신호선으로 쓰지 않는다.
+
+### 후속 검증 — 센서용 RS485 모듈 임시 대여로 RP2350 링크 성공
+
+추가 TTL-to-RS485 모듈이 아직 없어서, 센서 버스에 쓰던 RS485-TTL 모듈을 잠깐 분리해 Pico-RP2350 링크 검증에 사용했다. 센서들은 이 테스트 중 연결하지 않았다.
+
+임시 테스트 배선:
+
+```text
+Pico GP4 / UART1 TX -> RS485-TTL 모듈 RXD 또는 DI
+Pico GP5 / UART1 RX <- RS485-TTL 모듈 TXD 또는 RO
+Pico GND            -> RS485-TTL 모듈 GND
+
+RS485-TTL 모듈 A -> RP2350 RS485 A
+RS485-TTL 모듈 B -> RP2350 RS485 B
+RS485-TTL 모듈 GND -> RP2350 GND
+```
+
+테스트 펌웨어:
+
+```text
+firmware/tests/test_rp2350_rs485_display.py
+```
+
+테스트 결과:
+
+```text
+Pico -> RP2350 더미 센서 CSV 전송 성공
+RP2350 화면 WAIT -> LIVE 전환 확인
+RP2350 화면에 24.x / 35.x / 40.x / CO2 850대 더미값 표시 성공
+RP2350 -> Pico 릴레이 명령 1바이트 응답 확인: relay cmd: 0
+```
+
+이 검증으로 다음이 확인됐다.
+
+| 항목 | 결과 |
+|---|---|
+| Pico UART1 GP4/GP5 송수신 | 정상 |
+| RP2350 RS485 A/B 수신 | 정상 |
+| RP2350 화면 CSV 파싱/갱신 | 정상 |
+| RP2350에서 Pico로 1바이트 응답 | 정상 |
+| 최종 구조 타당성 | 확인 완료 |
+
+주의: 이 테스트는 기존 센서용 RS485 모듈을 임시로 빌려 쓴 것이므로, 실제 운영에서는 센서용 모듈과 RP2350 링크용 모듈을 분리해서 2개 사용한다.
+
+### 후속 재검증 — RP2350 RS485 링크 재연결 성공
+
+RS485 모듈을 2개로 나눠 재배선하는 과정에서 RP2350이 다시 `WAIT` 상태로 머물렀다. 처음에는 모듈 불량을 의심했지만, 해당 모듈은 앞서 RP2350 더미 데이터 테스트에 성공했던 모듈이었다. 최종적으로 문제는 모듈 자체가 아니라 재연결 시 A/B, GND, TX/RX 조합이 달라진 데 있었다.
+
+확인 내용:
+
+```text
+Pico는 test_rp2350_rs485_display.py로 더미 CSV를 계속 송신
+RP2350 화면은 WAIT 상태
+배선 재점검 후 RP2350 화면 LIVE 전환 성공
+```
+
+정리:
+
+```text
+RP2350 링크용 모듈은 불량이 아니었다.
+재연결 시에는 GND 공통과 A/B 방향을 반드시 먼저 확인한다.
+Pico GP4/GP5와 모듈 RXD/TXD 연결도 모듈 라벨 기준으로 다시 확인한다.
+성공한 조합은 그대로 고정하고, 센서용 모듈과 서로 바꾸지 않는다.
+```
+
+### 후속 검증 — RP2350 터치로 4채널 릴레이 IN1 ON/OFF 성공
+
+RP2350 터치 대시보드의 Relay 카드를 눌러 Pico GP2에 연결된 4채널 릴레이 모듈의 IN1을 제어했다. 릴레이 접점은 `NC / COM / NO` 순서였고, 팬은 `COM + NO` 조합으로 연결했다.
+
+제어 배선:
+
+```text
+Pico GP2 / 물리 4번핀 -> 4채널 릴레이 IN1 또는 Signal
+Pico GND              -> 릴레이 GND
+릴레이 VCC            -> 릴레이 모듈 전원
+```
+
+부하 배선:
+
+```text
+12V+ -> 릴레이 COM
+릴레이 NO -> 팬 +
+팬 - -> 12V-
+NC는 사용하지 않음
+```
+
+테스트 중 릴레이 동작이 화면 ON/OFF와 반대로 나와서 active-low 타입으로 판단했다. 이에 따라 Pico 코드에서 논리 명령과 실제 GP2 출력값을 분리했다.
+
+```text
+Relay OFF 명령: relay cmd 0 -> GP2 pin 1 -> 릴레이 OFF
+Relay ON  명령: relay cmd 1 -> GP2 pin 0 -> 릴레이 ON
+```
+
+수정한 파일:
+
+```text
+firmware/tests/test_rp2350_rs485_display.py
+firmware/pico/main.py
+```
+
+결과:
+
+```text
+RP2350 터치 -> RS485 응답 -> Pico GP2 -> 릴레이 IN1 -> 팬 ON/OFF 성공
+```
+
+### 후속 통합 — 수동 DE/RE 센서 모듈 + RP2350 + 릴레이 동시 동작
+
+추가로 구한 RS485 모듈은 `DI / DE / RE / RO` 핀이 있는 수동 방향제어형이었다. 이 모듈을 센서용으로 사용하기로 하고, Pico GP6으로 `DE+RE`를 묶어 제어했다.
+
+센서용 수동 RS485 모듈 배선:
+
+```text
+Pico GP0 / UART0 TX -> 모듈 DI
+Pico GP1 / UART0 RX <- 모듈 RO
+Pico GP6            -> 모듈 DE + RE
+Pico GND            -> 모듈 GND
+모듈 A/B            -> 센서 RS485 A/B
+```
+
+처음에는 온습도/토양 응답 CRC가 깨졌으나, 송신 후 바로 수신 모드로 전환하는 타이밍을 `uart.flush()` 기반으로 고치자 정상화됐다.
+
+핵심 코드:
+
+```python
+sensor_dir.value(1)  # TX
+uart.write(req)
+uart.flush()
+sensor_dir.value(0)  # RX
+```
+
+검증 결과:
+
+```text
+온습도 OK: temp=24.8C humidity=34.9%
+토양 OK: moisture=0.0% soil_temp=26.xC ph=7.5
+조도 OK: solar=3 W/m2
+CO2 OK: co2=925ppm 전후
+RP2350 표시/응답 OK: Display relay cmd 0/1 수신
+릴레이 active-low 제어 OK
+```
+
+현재 통합 펌웨어:
+
+```text
+firmware/pico/main.py
+```
+
+현재 제한:
+
+```text
+W5500은 뜨거워지는 문제가 있어 분리 상태다.
+main.py는 W5500 초기화 실패 시 네트워크만 비활성화하고 센서/RP2350/릴레이 루프는 계속 돌도록 방어 처리했다.
+릴레이 터치 반응은 현재 센서 송신 주기에 묶여 있어 즉시 반영되지 않는다.
+다음 개선은 센서값 전송 주기와 릴레이 명령 poll 주기를 분리하는 것이다.
+```
+
+### 현재 목표
+
+기존 Seeed XIAO RP2040 버전은 유지하고, Raspberry Pi Pico 일반 보드용 펌웨어와 RP2350 Touch LCD 4용 화면을 별도 구조로 분리한다.
+
+### 폴더 구조
+
+```text
+firmware/
+  xiao/main.py       # Seeed XIAO RP2040 버전
+  pico/main.py       # Raspberry Pi Pico 일반 버전
+  lib/               # W5500 공용 라이브러리
+  tests/             # 테스트 스크립트
+  legacy/            # 예전 개별 센서 스크립트
+
+RP2350-Touch-LCD-4/examples/
+  hunet_xiao/        # XIAO 시절 대시보드, I2C 수신/터치 비활성
+  hunet_pico/        # Pico 일반용 대시보드, UART 수신/터치 릴레이
+```
+
+### Pico 일반 버전 통신 방식
+
+처음에는 Pico GP4/GP5를 I2C0으로 쓰려 했지만, RP2350 Touch LCD 4의 뒤쪽 `SDA/SCL` 커넥터는 I2C1 GP6/GP7이고 터치 패널도 같은 버스를 사용한다. 터치를 살리려면 센서 데이터 수신을 I2C1에서 분리해야 한다.
+
+최종 코드 방향:
+
+```text
+Pico GP4 / UART1 TX -> TTL-to-RS485 DI -> RP2350 RS485 A/B
+Pico GP5 / UART1 RX <- TTL-to-RS485 RO <- RP2350 RS485 A/B
+GND 공통
+Baudrate 115200
+```
+
+동작:
+
+```text
+Pico -> RP2350: air_temp,humidity,moisture,soil_temp,ec,ph,n,p,k,solar,co2,relay\n
+RP2350 -> Pico: 릴레이 명령 1바이트 (0x00 OFF, 0x01 ON)
+```
+
+### 완료된 코드 상태
+
+- `firmware/pico/main.py`
+  - RS485 센서 4종 읽기 유지
+  - RP2350 통신을 I2C에서 UART1 GP4/GP5 기반 RS485 전송 구조로 변경
+  - RP2350에서 받은 1바이트 명령으로 GP2 릴레이 제어
+  - W5500은 현재 손상 의심 상태라 네트워크 코드 비활성화
+
+- `RP2350-Touch-LCD-4/examples/hunet_pico/hunet_pico.c`
+  - 온보드 RS485 포트 뒤의 UART1 GP8/GP9로 Pico 센서 CSV 수신
+  - I2C1 GP6/GP7은 터치 패널용으로 유지
+  - Relay 카드를 터치하면 `g_relay_cmd` 토글
+  - 다음 센서 CSV 수신 시 현재 릴레이 명령을 Pico로 1바이트 응답
+
+### 빌드 확인
+
+```text
+cd /Users/choeingyumac/Hunet/RP2350-Touch-LCD-4/build
+make hunet_pico -j8
+```
+
+결과:
+
+```text
+[100%] Built target hunet_pico
+```
+
+UF2:
+
+```text
+RP2350-Touch-LCD-4/build/examples/hunet_pico/hunet_pico.uf2
+```
+
+### 배선
+
+자세한 핀맵:
+
+```text
+docs/PINMAP_PICO.md
+docs/PINMAP_XIAO.md
+```
+
+Pico 일반 + RP2350 최종 배선:
+
+```text
+Pico GP4 -> TTL-to-RS485 DI
+Pico GP5 <- TTL-to-RS485 RO
+TTL-to-RS485 A -> RP2350 RS485 A
+TTL-to-RS485 B -> RP2350 RS485 B
+GND 공통
+```
+
+주의:
+
+```text
+RP2350 외부 단자는 RS485 A/B 차동 단자다.
+Pico UART GP4/GP5를 A/B에 직접 연결하면 안 된다.
+TTL-to-RS485 모듈이 올 때까지 RP2350은 WAIT 상태가 정상이다.
+임시 I2C 표시 전용 버전은 만들지 않고 최종 RS485 코드만 유지한다.
+```
+
+### W5500 상태
+
+일반 Pico 테스트 중 W5500 전원 문제로 모듈 손상 의심 상태가 됐다. Pico 자체는 살아있고 RS485 센서 4종 응답은 정상 확인했다.
+
+새 W5500으로 교체하기 전까지 일반 Pico 버전은:
+
+```text
+RS485 sensors -> Pico -> UART -> RP2350 LCD
+```
+
+표시/릴레이 제어만 우선 테스트한다.
 
 ---
 

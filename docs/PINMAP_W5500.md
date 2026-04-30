@@ -80,7 +80,7 @@ rst = Pin(28, Pin.OUT)
 
 펌웨어: `firmware/pico/main.py`
 
-하드웨어 SPI0 사용 (`baudrate=1_000_000`, `polarity=1`, `phase=1`)
+하드웨어 SPI0 후보 핀맵이다. 현재 일반 Pico용 `firmware/pico/main.py`에서는 W5500 모듈 손상 의심으로 네트워크 코드가 비활성화되어 있다. 새 W5500으로 교체하면 먼저 SPI VERSION 레지스터 테스트를 통과시킨 뒤 HTTP POST 코드를 다시 활성화한다.
 
 | W5500 핀 | Pico 핀 | GPIO | 설명 |
 |----------|---------|------|------|
@@ -99,8 +99,8 @@ rst = Pin(28, Pin.OUT)
 | GP0  | RS485 TX (UART0) |
 | GP1  | RS485 RX (UART0) |
 | GP2  | 릴레이 |
-| GP6  | I2C SDA (RP2350 디스플레이) |
-| GP7  | I2C SCL (RP2350 디스플레이) |
+| GP4  | TTL-to-RS485 DI (RP2350 표시/명령 연동 UART1 TX) |
+| GP5  | TTL-to-RS485 RO (RP2350 표시/명령 연동 UART1 RX) |
 | GP16 | W5500 MISO (SPI0 RX) |
 | GP17 | W5500 CS |
 | GP18 | W5500 SCK (SPI0 CLK) |
