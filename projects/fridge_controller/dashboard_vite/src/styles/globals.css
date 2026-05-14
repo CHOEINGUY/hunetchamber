@@ -1,0 +1,24 @@
+@import "@fontsource/pretendard/400.css";
+@import "@fontsource/pretendard/600.css";
+
+:root {
+  --font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  --bg-color: #f4f6f8;
+  --text-color: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --primary: #0f766e;
+  --primary-light: #f0fdf4;
+  --primary-dark: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+button { cursor: pointer; }

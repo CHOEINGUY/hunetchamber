@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fridge Dashboard</title>
+  <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f4f6f8; color: #111827; font-size: 15px;
+    }
+    body { margin: 0; }
+    main { max-width: 1280px; margin: 0 auto; padding: 28px 20px 56px; }
+    header { display: flex; justify-content: space-between; gap: 18px; align-items: flex-end; margin-bottom: 20px; }
+    h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.3px; }
+    .subtitle { margin: 0; color: #6b7280; font-size: 14px; }
+    .status { text-align: right; font-size: 13px; color: #6b7280; line-height: 1.6; }
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: 20px; }
+    .tab {
+      border: 1px solid transparent; border-bottom: 0; background: transparent; color: #6b7280;
+      padding: 9px 16px; border-radius: 8px 8px 0 0; font-weight: 600; font-size: 14px;
+      cursor: pointer; font-family: inherit;
+    }
+    .tab:hover { color: #111827; background: #f9fafb; }
+    .tab.active { background: #fff; color: #111827; border-color: #e5e7eb; margin-bottom: -1px; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .latest { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; }
+    .metric { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; min-height: 84px; }
+    .metric span { display: block; color: #6b7280; font-size: 11px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric strong { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .metric small { display: block; margin-top: 5px; color: #9ca3af; font-size: 12px; }
+    .metric.on strong { color: #059669; }
+    .metric.off strong { color: #9ca3af; }
+    .metric.warn strong { color: #d97706; }
+    .split { display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 12px; align-items: start; }
+    .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; }
+    .panel h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: #374151; }
+    .reason { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 16px; }
+    .kv { display: grid; grid-template-columns: 1fr auto; gap: 7px 16px; font-size: 13px; }
+    .kv div:nth-child(odd) { color: #6b7280; }
+    .kv div:nth-child(even) { font-weight: 600; text-align: right; }
+    .toolbar { display: flex; flex-direction: column; gap: 0; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .toolbar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 0; }
+    .toolbar-row + .toolbar-row { border-top: 1px solid #f3f4f6; }
+    .option-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; min-width: 80px; }
+    .option-group { display: flex; align-items: center; gap: 8px; }
+    .spacer { flex: 1; }
+    .btn-group { display: flex; border-radius: 7px; overflow: hidden; border: 1px solid #e5e7eb; }
+    .btn-group button {
+      border: 0; border-right: 1px solid #e5e7eb; background: #fff; color: #374151;
+      padding: 6px 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .btn-group button:last-child { border-right: 0; }
+    .btn-group button:hover { background: #f9fafb; }
+    .btn-group button.active { background: #0f766e; color: #fff; border-color: #0f766e; }
+    .toggle {
+      border: 1px solid #e5e7eb; background: #fff; color: #374151; border-radius: 7px;
+      padding: 6px 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .toggle.active { background: #0f766e; border-color: #0f766e; color: #fff; }
+    .steady-input { display: flex; align-items: center; gap: 6px; }
+    .steady-input input[type="datetime-local"] {
+      border: 1px solid #e5e7eb; border-radius: 7px; padding: 5px 9px;
+      font-size: 13px; font-family: inherit; color: #374151; background: #fff; outline: none;
+    }
+    .steady-input input:focus { border-color: #0f766e; }
+    .steady-input button {
+      border: 1px solid #e5e7eb; background: #fff; color: #6b7280; border-radius: 7px;
+      padding: 5px 9px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .steady-badge {
+      font-size: 12px; color: #0f766e; font-weight: 600;
+      background: #f0fdf9; border: 1px solid #a7f3d0; border-radius: 6px; padding: 3px 8px;
+    }
+    .chart-title { font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 10px; }
+    .chart { width: 100%; height: 420px; }
+    .mini-chart { width: 100%; height: 180px; }
+    .summary-header { display: flex; align-items: baseline; gap: 8px; margin: 16px 0 10px; }
+    .summary-header h3 { margin: 0; font-size: 14px; font-weight: 700; color: #374151; }
+    .summary-note { font-size: 12px; color: #9ca3af; }
+    .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .summary .metric { min-height: 70px; }
+    .summary .metric strong { font-size: 20px; }
+    .table-wrap {
+      overflow-x: auto; overflow-y: auto; max-height: 420px;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-top: 12px;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 1060px; }
+    thead th { position: sticky; top: 0; z-index: 1; }
+    th, td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; text-align: right; font-size: 13px; white-space: nowrap; }
+    th { color: #6b7280; font-weight: 600; background: #f9fafb; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+    th:nth-child(2), td:nth-child(2), th:nth-child(3), td:nth-child(3), th:last-child, td:last-child { text-align: left; }
+    tr:last-child td { border-bottom: 0; }
+    .empty { padding: 32px; text-align: center; color: #9ca3af; font-size: 14px; }
+    .ctrl-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 12px; }
+    .ctrl-panel h2 { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: #374151; }
+    .ctrl-panel.danger { border-color: #fecaca; }
+    .ctrl-panel.danger h2 { color: #dc2626; }
+    .ctrl-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .ctrl-target-val { padding: 5px 20px; font-size: 22px; font-weight: 700; min-width: 90px; text-align: center; color: #111827; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; }
+    .danger-btn { border: 0; background: #dc2626; color: #fff; border-radius: 8px; padding: 10px 24px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .danger-btn:hover { background: #b91c1c; }
+    .cmd-status { 
+  background: #f9fafb; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 8px; 
+  padding: 10px 14px; 
+  font-size: 13px; 
+  color: #6b7280; 
+  font-family: monospace; 
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  position: relative;
+}
+.cmd-status.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.cmd-status::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 14px;
+  position: absolute;
+  left: 12px;
+}
+.cmd-status.pending::before { content: "\f110"; color: #d97706; } /* fa-spinner */
+.cmd-status.ok::before { content: "\f00c"; color: #059669; } /* fa-check */
+.cmd-status.err::before { content: "\f071"; color: #dc2626; } /* fa-exclamation-triangle */
+.cmd-status.pending { color: #d97706; background: #fffbeb; border-color: #fcd34d; padding-left: 32px; }
+.cmd-status.ok { color: #059669; background: #f0fdf4; border-color: #a7f3d0; padding-left: 32px; }
+.cmd-status.err { color: #dc2626; background: #fef2f2; border-color: #fecaca; padding-left: 32px; }
+    .cmd-status.pending { color: #d97706; background: #fffbeb; border-color: #fcd34d; }
+    .cmd-status.ok { color: #059669; background: #f0fdf4; border-color: #a7f3d0; }
+    .cmd-status.err { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
+    @media (max-width: 920px) {
+      header { display: block; }
+      .status { text-align: left; margin-top: 10px; }
+      .latest, .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .chart { height: 340px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Fridge Dashboard</h1>
+        <p class="subtitle">Pico WH 냉장고 온도 제어 모니터링</p>
+      </div>
+      <div class="status">
+        <div id="connection">연결 확인 중...</div>
+        <div id="updated">-</div>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="live">실시간 상태</button>
+      <button class="tab" data-tab="analysis">데이터 분석</button>
+      <button class="tab" data-tab="control">제어</button>
+    </nav>
+
+    <section class="view active" id="live">
+      <section class="latest" id="latest"></section>
+      <section class="split">
+        <div class="panel">
+          <h2>최근 10분 온도 / SSR</h2>
+          <div class="mini-chart" id="liveChart"></div>
+        </div>
+        <div class="panel">
+          <h2>제어 판단</h2>
+          <div class="reason" id="reasonText">-</div>
+          <div class="kv" id="controlKv"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="analysis">
+      <div class="toolbar">
+        <div class="toolbar-row">
+          <span class="option-label">기간</span>
+          <div class="btn-group" id="rangeButtons">
+            <button data-seconds="600" class="active">10분</button>
+            <button data-seconds="1800">30분</button>
+            <button data-seconds="3600">1시간</button>
+            <button data-seconds="21600">6시간</button>
+            <button data-seconds="86400">24시간</button>
+          </div>
+          <div class="spacer"></div>
+          <button class="toggle active" id="autoRefresh">자동 갱신 ON</button>
+        </div>
+        <div class="toolbar-row">
+          <span class="option-label">차트 모드</span>
+          <div class="btn-group" id="chartMode">
+            <button data-mode="temp" class="active">온도</button>
+            <button data-mode="deviation">편차</button>
+          </div>
+          <span class="option-label" style="margin-left:12px">스무딩</span>
+          <div class="btn-group" id="smoothing">
+            <button data-smooth="1" class="active">원본</button>
+            <button data-smooth="5">5초</button>
+            <button data-smooth="10">10초</button>
+          </div>
+        </div>
+        <div class="toolbar-row">
+          <span class="option-label">정상 운전 시작</span>
+          <div class="steady-input">
+            <input type="datetime-local" id="steadyStart">
+            <button id="clearSteady">초기화</button>
+          </div>
+          <span id="steadyBadge"></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="chart-title" id="chartTitle">온도 / 목표 범위 / SSR 상태</p>
+        <div class="chart" id="analysisChart"></div>
+      </div>
+
+      <div class="summary-header">
+        <h3>분석 요약</h3>
+        <span class="summary-note" id="summaryNote"></span>
+      </div>
+      <section class="summary" id="summary"></section>
+      <section class="table-wrap" id="table"></section>
+    </section>
+
+    <section class="view" id="control">
+      <section class="latest" style="margin-bottom:16px" id="ctrlLive"></section>
+
+      <div class="ctrl-panel">
+        <h2>목표 온도</h2>
+        <div class="ctrl-row">
+          <div class="btn-group">
+            <button id="targetMinus" style="font-size:18px;padding:6px 16px">−</button>
+            <span class="ctrl-target-val" id="ctrlTargetVal">-</span>
+            <button id="targetPlus" style="font-size:18px;padding:6px 16px">+</button>
+          </div>
+          <button class="toggle" id="sendTarget">적용</button>
+        </div>
+      </div>
+
+      <div class="ctrl-panel">
+        <h2>상한 편차 (켜기 기준: 목표 + X)</h2>
+        <div class="ctrl-row">
+          <div class="btn-group">
+            <button id="bandHighMinus" style="font-size:18px;padding:6px 16px">−</button>
+            <span class="ctrl-target-val" id="ctrlBandHighVal">-</span>
+            <button id="bandHighPlus" style="font-size:18px;padding:6px 16px">+</button>
+          </div>
+          <button class="toggle" id="sendBandHigh">적용</button>
+        </div>
+      </div>
+
+      <div class="ctrl-panel">
+        <h2>하한 편차 (끄기 기준: 목표 − X)</h2>
+        <div class="ctrl-row">
+          <div class="btn-group">
+            <button id="bandLowMinus" style="font-size:18px;padding:6px 16px">−</button>
+            <span class="ctrl-target-val" id="ctrlBandLowVal">-</span>
+            <button id="bandLowPlus" style="font-size:18px;padding:6px 16px">+</button>
+          </div>
+          <button class="toggle" id="sendBandLow">적용</button>
+        </div>
+      </div>
+
+      <div class="ctrl-panel">
+        <h2>자동 제어 / 무장</h2>
+        <div class="ctrl-row">
+          <div class="btn-group">
+            <button id="autoOn">AUTO ON</button>
+            <button id="autoOff">AUTO OFF</button>
+          </div>
+          <div class="btn-group">
+            <button id="armBtn">ARM</button>
+            <button id="disarmBtn">DISARM</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ctrl-panel">
+        <h2>팬</h2>
+        <div class="btn-group">
+          <button id="fanOn">ON</button>
+          <button id="fanOff">OFF</button>
+        </div>
+      </div>
+
+      <div class="ctrl-panel danger">
+        <h2>위험</h2>
+        <button class="danger-btn" id="forceOffBtn">FORCE OFF</button>
+        <p style="margin:8px 0 0;font-size:12px;color:#9ca3af">즉시 OFF + disarm. 콤프레서 보호 무시.</p>
+      </div>
+
+      <div id="cmdStatus" class="cmd-status">명령 없음</div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      activeTab: "live",
+      rangeSeconds: 600,
+      autoRefresh: true,
+      chartMode: "temp",
+      smoothStep: 1,
+      steadyStart: null,
+      liveRows: [],
+      analysisRows: [],
+      liveChart: null,
+      analysisChart: null,
+      controlTarget: null,
+      controlTargetDirty: false,
+      controlBandHigh: null,
+      controlBandHighDirty: false,
+      controlBandLow: null,
+      controlBandLowDirty: false
+    };
+
+    const metricLabels = [
+      ["temp_c", "현재 온도", "\u00b0C", ""],
+      ["target_c", "목표 온도", "\u00b0C", ""],
+      ["humidity", "습도", "%", ""],
+      ["fridge_on", "SSR 출력", "", "bool"],
+      ["auto_mode", "자동 제어", "", "bool"],
+      ["armed", "무장 상태", "", "bool"],
+      ["fan_percent", "팬", "%", ""],
+      ["led_percent", "LED", "%", ""]
+    ];
+
+    function valueText(row, key, unit) {
+      unit = unit || "";
+      const value = row && row[key] !== undefined ? row[key] : null;
+      if (value === null || value === undefined) return "-";
+      if (key === "fridge_on" || key === "auto_mode" || key === "armed") return Number(value) ? "ON" : "OFF";
+      return value + (unit ? " " + unit : "");
+    }
+
+    function durationText(seconds) {
+      if (seconds === null || seconds === undefined) return "-";
+      const s = Math.max(0, Number(seconds));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = Math.floor(s % 60);
+      if (h) return h + "h " + m + "m";
+      if (m) return m + "m " + sec + "s";
+      return sec + "s";
+    }
+
+    function numericValues(rows, key) {
+      return rows.map(function(r) { return r[key]; })
+        .filter(function(v) { return v !== null && v !== undefined; })
+        .map(Number);
+    }
+
+    function average(values) {
+      if (!values.length) return null;
+      return values.reduce(function(a, b) { return a + b; }, 0) / values.length;
+    }
+
+    function stddev(values) {
+      if (values.length < 2) return null;
+      const avg = average(values);
+      return Math.sqrt(values.reduce(function(sum, v) { return sum + Math.pow(v - avg, 2); }, 0) / values.length);
+    }
+
+    function downsample(rows, step) {
+      if (step <= 1) return rows;
+      const result = [];
+      for (let i = 0; i < rows.length; i += step) {
+        const chunk = rows.slice(i, i + step);
+        const repr = Object.assign({}, chunk[Math.floor(chunk.length / 2)]);
+        ["temp_c", "humidity", "target_c", "band_c"].forEach(function(key) {
+          const vals = chunk.map(function(r) { return r[key]; })
+            .filter(function(v) { return v !== null && v !== undefined; }).map(Number);
+          repr[key] = vals.length ? vals.reduce(function(a, b) { return a + b; }, 0) / vals.length : null;
+        });
+        result.push(repr);
+      }
+      return result;
+    }
+
+    function cycleStats(rows) {
+      const ordered = rows.slice().reverse();
+      let onCount = 0, last = null, onRows = 0;
+      ordered.forEach(function(row) {
+        const cur = Number(row.fridge_on || 0);
+        if (last !== null && cur !== last && cur === 1) onCount++;
+        if (cur === 1) onRows++;
+        last = cur;
+      });
+      let durationHours = 0;
+      if (ordered.length >= 2) {
+        const t0 = new Date(ordered[0].created_at.replace(" ", "T"));
+        const t1 = new Date(ordered[ordered.length - 1].created_at.replace(" ", "T"));
+        durationHours = Math.abs(t1 - t0) / 3600000;
+      }
+      return {
+        onCount: onCount,
+        onRatio: ordered.length ? (onRows / ordered.length) * 100 : 0,
+        cyclesPerHour: durationHours > 0.01 ? onCount / durationHours : null
+      };
+    }
+
+    function steadyRows(rows) {
+      if (!state.steadyStart) return rows;
+      return rows.filter(function(r) {
+        return new Date(r.created_at.replace(" ", "T")) >= state.steadyStart;
+      });
+    }
+
+    function chartData(rows) {
+      return downsample(rows.slice().reverse(), state.smoothStep);
+    }
+
+    function renderLatest(row) {
+      const el = document.getElementById("latest");
+      if (!row) { el.innerHTML = ""; return; }
+      el.innerHTML = metricLabels.map(function(item) {
+        const key = item[0], label = item[1], unit = item[2], type = item[3];
+        const active = Number(row[key] || 0) > 0;
+        const klass = type === "bool" ? (active ? "on" : "off") : "";
+        const sub = key === "temp_c" ? durationText(row.row_age_s) + " \uc804 \uc218\uc2e0" :
+          key === "target_c" ? "\ud5c8\uc6a9\ubc94\uc704 \u00b1" + (row.band_c || "-") + "\u00b0C" :
+          key === "fridge_on" ? "\ud604\uc7ac \uc0c1\ud0dc " + durationText(row.state_elapsed_s) : "";
+        return '<div class="metric ' + klass + '"><span>' + label + '</span><strong>' + valueText(row, key, unit) + '</strong><small>' + sub + '</small></div>';
+      }).join("");
+      document.getElementById("reasonText").textContent = row.reason || "-";
+      document.getElementById("controlKv").innerHTML =
+        '<div>ON \uac00\ub2a5\uae4c\uc9c0</div><div>' + durationText(row.wait_on_s) + '</div>' +
+        '<div>OFF \uac00\ub2a5\uae4c\uc9c0</div><div>' + durationText(row.wait_off_s) + '</div>' +
+        '<div>\ud604\uc7ac \uc0c1\ud0dc \uc720\uc9c0</div><div>' + durationText(row.state_elapsed_s) + '</div>' +
+        '<div>DB \uc800\uc7a5</div><div>' + durationText(row.row_age_s) + ' \uc804</div>' +
+        '<div>\uc13c\uc11c \uac31\uc2e0</div><div>' + durationText(row.sensor_age_s) + ' \uc804</div>' +
+        '<div>\uc7a5\uce58</div><div>' + (row.device_id || "-") + '</div>';
+    }
+
+    function renderTable(rows) {
+      const el = document.getElementById("table");
+      if (!rows.length) {
+        el.innerHTML = '<div class="empty">\uc800\uc7a5\ub41c \ub370\uc774\ud130\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.</div>';
+        return;
+      }
+      let html = '<table><thead><tr>' +
+        '<th>ID</th><th>\uc2dc\uac04</th><th>\uc7a5\uce58</th><th>\uc628\ub3c4</th><th>\uc2b5\ub3c4</th><th>\ubaa9\ud45c</th>' +
+        '<th>\ub0c9\uc7a5\uace0</th><th>\uc790\ub3d9</th><th>\ubb34\uc7a5</th><th>\ud32c</th><th>LED</th>' +
+        '<th>ON\ub300\uae30</th><th>OFF\ub300\uae30</th><th>\uc0c1\ud0dc\uc2dc\uac04</th><th>\uc13c\uc11c\ub098\uc774</th><th>\uc774\uc720</th>' +
+        '</tr></thead><tbody>';
+      rows.forEach(function(row) {
+        html += '<tr>' +
+          '<td>' + row.id + '</td>' +
+          '<td>' + row.created_at + '</td>' +
+          '<td>' + row.device_id + '</td>' +
+          '<td>' + valueText(row, "temp_c") + '</td>' +
+          '<td>' + valueText(row, "humidity") + '</td>' +
+          '<td>' + valueText(row, "target_c") + '</td>' +
+          '<td>' + valueText(row, "fridge_on") + '</td>' +
+          '<td>' + valueText(row, "auto_mode") + '</td>' +
+          '<td>' + valueText(row, "armed") + '</td>' +
+          '<td>' + valueText(row, "fan_percent") + '</td>' +
+          '<td>' + valueText(row, "led_percent") + '</td>' +
+          '<td>' + valueText(row, "wait_on_s") + '</td>' +
+          '<td>' + valueText(row, "wait_off_s") + '</td>' +
+          '<td>' + valueText(row, "state_elapsed_s") + '</td>' +
+          '<td>' + valueText(row, "sensor_age_s") + '</td>' +
+          '<td>' + (row.reason || "-") + '</td>' +
+          '</tr>';
+      });
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    }
+
+    function renderLiveChart(rows) {
+      const el = document.getElementById("liveChart");
+      if (!state.liveChart) state.liveChart = echarts.init(el);
+      const data = chartData(rows);
+      state.liveChart.setOption({
+        animation: false,
+        tooltip: { trigger: "axis" },
+        grid: { left: 44, right: 44, top: 16, bottom: 32 },
+        xAxis: { type: "category", data: data.map(function(r) { return r.created_at ? r.created_at.slice(11, 16) : ""; }), axisLabel: { fontSize: 11 } },
+        yAxis: [
+          { type: "value", name: "\u00b0C", scale: true, nameTextStyle: { fontSize: 11 } },
+          { type: "value", name: "SSR", min: 0, max: 1, interval: 1, nameTextStyle: { fontSize: 11 } }
+        ],
+        series: [
+          { name: "\uc628\ub3c4", type: "line", smooth: true, symbol: "none", connectNulls: true, data: data.map(function(r) { return r.temp_c !== null ? +Number(r.temp_c).toFixed(2) : null; }), color: "#0284c7" },
+          { name: "\ubaa9\ud45c", type: "line", symbol: "none", lineStyle: { type: "dashed" }, data: data.map(function(r) { return r.target_c; }), color: "#94a3b8" },
+          { name: "SSR", type: "bar", yAxisIndex: 1, data: data.map(function(r) { return Number(r.fridge_on || 0); }), color: "rgba(16,185,129,0.3)", barWidth: "70%" }
+        ]
+      });
+    }
+
+    function renderAnalysisChart(rows) {
+      const el = document.getElementById("analysisChart");
+      if (!state.analysisChart) state.analysisChart = echarts.init(el);
+      const data = chartData(steadyRows(rows));
+      const labels = data.map(function(r) { return r.created_at ? r.created_at.slice(11, 16) : ""; });
+      let series, yAxis;
+
+      if (state.chartMode === "deviation") {
+        document.getElementById("chartTitle").textContent = "\ubaa9\ud45c \ub300\ube44 \uc628\ub3c4 \ud3b8\ucc28 / SSR \uc0c1\ud0dc";
+        const devData = data.map(function(r) {
+          if (r.temp_c === null || r.target_c === null) return null;
+          return +( Number(r.temp_c) - Number(r.target_c) ).toFixed(2);
+        });
+        const bandVal = data.length && data[0].band_c != null ? Number(data[0].band_c) : 0.5;
+        yAxis = [
+          { type: "value", name: "\ud3b8\ucc28 \u00b0C", scale: false },
+          { type: "value", name: "SSR", min: 0, max: 1, interval: 1 }
+        ];
+        series = [
+          { name: "\ud3b8\ucc28", type: "line", smooth: true, symbol: "none", connectNulls: true, data: devData, color: "#7c3aed",
+            areaStyle: { color: "rgba(124,58,237,0.06)" },
+            markLine: { silent: true, symbol: "none", data: [
+              { yAxis: 0, lineStyle: { color: "#374151", type: "solid", width: 1 } },
+              { yAxis: bandVal, lineStyle: { color: "#f97316", type: "dashed" } },
+              { yAxis: -bandVal, lineStyle: { color: "#f97316", type: "dashed" } }
+            ]}
+          },
+          { name: "SSR ON", type: "bar", yAxisIndex: 1, data: data.map(function(r) { return Number(r.fridge_on || 0); }), color: "rgba(16,185,129,0.2)", barWidth: "85%" }
+        ];
+      } else {
+        document.getElementById("chartTitle").textContent = "\uc628\ub3c4 / \ubaa9\ud45c \ubc94\uc704 / SSR \uc0c1\ud0dc";
+        const upper = data.map(function(r) { return r.target_c != null && r.band_c != null ? +(Number(r.target_c) + Number(r.band_c)).toFixed(2) : null; });
+        const lower = data.map(function(r) {
+          const bl = r.band_low_c != null ? r.band_low_c : r.band_c;
+          return r.target_c != null && bl != null ? +(Number(r.target_c) - Number(bl)).toFixed(2) : null;
+        });
+        yAxis = [
+          { type: "value", name: "\uc628\ub3c4 \u00b0C", scale: true },
+          { type: "value", name: "SSR", min: 0, max: 1, interval: 1 }
+        ];
+        series = [
+          { name: "\ud604\uc7ac\uc628\ub3c4", type: "line", smooth: true, symbol: "none", connectNulls: true, data: data.map(function(r) { return r.temp_c !== null ? +Number(r.temp_c).toFixed(2) : null; }), color: "#0284c7" },
+          { name: "\ubaa9\ud45c\uc628\ub3c4", type: "line", symbol: "none", lineStyle: { type: "dashed" }, data: data.map(function(r) { return r.target_c; }), color: "#334155" },
+          { name: "\uc0c1\ud55c", type: "line", symbol: "none", data: upper, color: "#f97316", lineStyle: { type: "dashed", width: 1 } },
+          { name: "\ud558\ud55c", type: "line", symbol: "none", data: lower, color: "#f97316", lineStyle: { type: "dashed", width: 1 } },
+          { name: "SSR ON", type: "bar", yAxisIndex: 1, data: data.map(function(r) { return Number(r.fridge_on || 0); }), color: "rgba(16,185,129,0.2)", barWidth: "85%" }
+        ];
+      }
+
+      state.analysisChart.setOption({
+        animation: false,
+        tooltip: { trigger: "axis" },
+        legend: { top: 0, textStyle: { fontSize: 12, fontFamily: "Pretendard" } },
+        dataZoom: [{ type: "inside" }, { type: "slider", height: 22, bottom: 6 }],
+        grid: { left: 54, right: 54, top: 44, bottom: 58 },
+        xAxis: { type: "category", data: labels, axisLabel: { fontSize: 11 } },
+        yAxis: yAxis,
+        series: series
+      });
+    }
+
+    function renderSummary(rows) {
+      const filtered = steadyRows(rows);
+      const temps = numericValues(filtered, "temp_c");
+      const deviations = filtered.map(function(r) {
+        if (r.temp_c === null || r.target_c === null) return null;
+        return Math.abs(Number(r.temp_c) - Number(r.target_c));
+      }).filter(function(v) { return v !== null; });
+      const stats = cycleStats(filtered);
+      const inBand = filtered.filter(function(r) {
+        if (r.temp_c === null || r.target_c === null || r.band_c === null) return false;
+        return Math.abs(Number(r.temp_c) - Number(r.target_c)) <= Number(r.band_c);
+      }).length;
+      const inBandRatio = filtered.length ? (inBand / filtered.length) * 100 : 0;
+      const sd = stddev(temps);
+      const avgDev = average(deviations);
+      const noteEl = document.getElementById("summaryNote");
+      if (state.steadyStart) {
+        noteEl.textContent = "\uc815\uc0c1 \uc6b4\uc804 \uad6c\uac04 \uae30\uc900 \u2014 " + state.steadyStart.toLocaleString("ko-KR") + " \uc774\ud6c4 " + filtered.length + "\uac1c row";
+        noteEl.style.color = "#0f766e";
+      } else {
+        noteEl.textContent = "\uc804\uccb4 \uad6c\uac04 (" + filtered.length + "\uac1c) \u2014 \uc815\uc0c1 \uc6b4\uc804 \uc2dc\uc791 \uc2dc\uc810 \uc124\uc815 \uad8c\uc7a5";
+        noteEl.style.color = "#9ca3af";
+      }
+      const cards = [
+        ["\ud3c9\uade0 \uc628\ub3c4", temps.length ? average(temps).toFixed(2) + " \u00b0C" : "-"],
+        ["\ucd5c\uc800 / \ucd5c\uace0", temps.length ? Math.min.apply(null, temps).toFixed(1) + " / " + Math.max.apply(null, temps).toFixed(1) + " \u00b0C" : "-"],
+        ["\uc628\ub3c4 \ud45c\uc900\ud3b8\ucc28 \u03c3", sd !== null ? sd.toFixed(3) + " \u00b0C" : "-"],
+        ["\ud3c9\uade0 \ud3b8\ucc28", avgDev !== null ? avgDev.toFixed(3) + " \u00b0C" : "-"],
+        ["\ubaa9\ud45c\ubc94\uc704 \uccb4\ub958", inBandRatio.toFixed(1) + " %"],
+        ["SSR ON \ube44\uc728", stats.onRatio.toFixed(1) + " %"],
+        ["SSR \uc0ac\uc774\ud074/\uc2dc\uac04", stats.cyclesPerHour !== null ? stats.cyclesPerHour.toFixed(1) + " \ud68c" : "-"],
+        ["SSR ON \uc804\ud658", stats.onCount + " \ud68c"]
+      ];
+      document.getElementById("summary").innerHTML = cards.map(function(c) {
+        return '<div class="metric"><span>' + c[0] + '</span><strong>' + c[1] + '</strong></div>';
+      }).join("");
+    }
+
+let cmdStatusTimeout = null;
+    
+    async function sendCmd(cmd) {
+        const el = document.getElementById("cmdStatus");
+        el.textContent = "\uc804\uc1a1 \uc911: " + cmd;
+        el.className = "cmd-status pending visible";
+        
+        // Clear previous timeout if exists
+        if (cmdStatusTimeout) {
+            clearTimeout(cmdStatusTimeout);
+        }
+        
+        // Auto-hide after 3 seconds
+        cmdStatusTimeout = setTimeout(() => {
+            el.className = el.className.replace('visible', '');
+        }, 3000);
+        
+        try {
+            const res = await fetch("/api/cmd", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cmd: cmd })
+            });
+            const data = await res.json();
+            if (data.ok) {
+                el.textContent = "\uc804\uc1a1\ub428 (Pico \uc218\uc2e0 \ub300\uae30): " + cmd;
+                el.className = "cmd-status ok visible";
+                
+                // Reset timer for success state
+                if (cmdStatusTimeout) {
+                    clearTimeout(cmdStatusTimeout);
+                }
+                cmdStatusTimeout = setTimeout(() => {
+                    el.className = el.className.replace('visible', '');
+                }, 3000);
+            } else {
+                el.textContent = "\uc624\ub958: " + (data.error || "?");
+                el.className = "cmd-status err visible";
+                
+                // Reset timer for error state
+                if (cmdStatusTimeout) {
+                    clearTimeout(cmdStatusTimeout);
+                }
+                cmdStatusTimeout = setTimeout(() => {
+                    el.className = el.className.replace('visible', '');
+                }, 3000);
+            }
+        } catch (err) {
+            el.textContent = "\uc2e4\ud328: " + err.message;
+            el.className = "cmd-status err visible";
+            
+            // Reset timer for error state
+            if (cmdStatusTimeout) {
+                clearTimeout(cmdStatusTimeout);
+            }
+            cmdStatusTimeout = setTimeout(() => {
+                el.className = el.className.replace('visible', '');
+            }, 3000);
+        }
+    }
+
+    function renderControlState(row) {
+      if (!row) return;
+      if (!state.controlTargetDirty) {
+        state.controlTarget = Number(row.target_c || 15);
+      }
+      if (!state.controlBandHighDirty) {
+        state.controlBandHigh = Number(row.band_c || 0.5);
+      }
+      if (!state.controlBandLowDirty) {
+        state.controlBandLow = row.band_low_c != null ? Number(row.band_low_c) : Number(row.band_c || 0.5);
+      }
+      document.getElementById("ctrlTargetVal").textContent = state.controlTarget.toFixed(1) + " \u00b0C";
+      document.getElementById("ctrlBandHighVal").textContent = "+" + state.controlBandHigh.toFixed(1) + " \u00b0C";
+      document.getElementById("ctrlBandLowVal").textContent = "\u2212" + state.controlBandLow.toFixed(1) + " \u00b0C";
+      const isOn = Number(row.fridge_on || 0);
+      const isAuto = Number(row.auto_mode || 0);
+      const isArmed = Number(row.armed || 0);
+      document.getElementById("ctrlLive").innerHTML =
+        '<div class="metric ' + (row.temp_c !== null ? "" : "warn") + '"><span>\ud604\uc7ac \uc628\ub3c4</span><strong>' + (row.temp_c !== null ? Number(row.temp_c).toFixed(1) + " \u00b0C" : "-") + '</strong></div>' +
+        '<div class="metric ' + (isAuto ? "on" : "off") + '"><span>\uc790\ub3d9 \uc81c\uc5b4</span><strong>' + (isAuto ? "ON" : "OFF") + '</strong></div>' +
+        '<div class="metric ' + (isOn ? "on" : "off") + '"><span>\ub0c9\uc7a5\uace0</span><strong>' + (isOn ? "ON" : "OFF") + '</strong><small>' + durationText(row.state_elapsed_s) + '</small></div>' +
+        '<div class="metric ' + (isArmed ? "on" : "warn") + '"><span>\ubb34\uc7a5</span><strong>' + (isArmed ? "ARMED" : "DISARMED") + '</strong></div>';
+    }
+
+    document.getElementById("targetMinus").addEventListener("click", function() {
+      if (state.controlTarget === null) return;
+      state.controlTarget = Math.max(0, +(state.controlTarget - 0.5).toFixed(1));
+      state.controlTargetDirty = true;
+      document.getElementById("ctrlTargetVal").textContent = state.controlTarget.toFixed(1) + " \u00b0C";
+    });
+    document.getElementById("targetPlus").addEventListener("click", function() {
+      if (state.controlTarget === null) return;
+      state.controlTarget = Math.min(25, +(state.controlTarget + 0.5).toFixed(1));
+      state.controlTargetDirty = true;
+      document.getElementById("ctrlTargetVal").textContent = state.controlTarget.toFixed(1) + " \u00b0C";
+    });
+    document.getElementById("sendTarget").addEventListener("click", function() {
+      if (state.controlTarget === null) return;
+      state.controlTargetDirty = false;
+      sendCmd("target " + state.controlTarget.toFixed(1));
+    });
+    document.getElementById("bandHighMinus").addEventListener("click", function() {
+      if (state.controlBandHigh === null) return;
+      state.controlBandHigh = Math.max(0.1, +(state.controlBandHigh - 0.1).toFixed(1));
+      state.controlBandHighDirty = true;
+      document.getElementById("ctrlBandHighVal").textContent = "+" + state.controlBandHigh.toFixed(1) + " \u00b0C";
+    });
+    document.getElementById("bandHighPlus").addEventListener("click", function() {
+      if (state.controlBandHigh === null) return;
+      state.controlBandHigh = Math.min(5.0, +(state.controlBandHigh + 0.1).toFixed(1));
+      state.controlBandHighDirty = true;
+      document.getElementById("ctrlBandHighVal").textContent = "+" + state.controlBandHigh.toFixed(1) + " \u00b0C";
+    });
+    document.getElementById("sendBandHigh").addEventListener("click", function() {
+      if (state.controlBandHigh === null) return;
+      state.controlBandHighDirty = false;
+      sendCmd("bandhigh " + state.controlBandHigh.toFixed(1));
+    });
+    document.getElementById("bandLowMinus").addEventListener("click", function() {
+      if (state.controlBandLow === null) return;
+      state.controlBandLow = Math.max(0.1, +(state.controlBandLow - 0.1).toFixed(1));
+      state.controlBandLowDirty = true;
+      document.getElementById("ctrlBandLowVal").textContent = "\u2212" + state.controlBandLow.toFixed(1) + " \u00b0C";
+    });
+    document.getElementById("bandLowPlus").addEventListener("click", function() {
+      if (state.controlBandLow === null) return;
+      state.controlBandLow = Math.min(5.0, +(state.controlBandLow + 0.1).toFixed(1));
+      state.controlBandLowDirty = true;
+      document.getElementById("ctrlBandLowVal").textContent = "\u2212" + state.controlBandLow.toFixed(1) + " \u00b0C";
+    });
+    document.getElementById("sendBandLow").addEventListener("click", function() {
+      if (state.controlBandLow === null) return;
+      state.controlBandLowDirty = false;
+      sendCmd("bandlow " + state.controlBandLow.toFixed(1));
+    });
+    document.getElementById("autoOn").addEventListener("click", function() { sendCmd("auto 1"); });
+    document.getElementById("autoOff").addEventListener("click", function() { sendCmd("auto 0"); });
+    document.getElementById("armBtn").addEventListener("click", function() { sendCmd("arm"); });
+    document.getElementById("disarmBtn").addEventListener("click", function() { sendCmd("disarm"); });
+    document.getElementById("fanOn").addEventListener("click", function() { sendCmd("fan 100"); });
+    document.getElementById("fanOff").addEventListener("click", function() { sendCmd("fan 0"); });
+    document.getElementById("forceOffBtn").addEventListener("click", function() {
+      if (!confirm("FORCE OFF \uc2e4\ud589\ud558\uaca0\uc2b5\ub2c8\uae4c?")) return;
+      sendCmd("forceoff");
+    });
+
+    async function refresh() {
+      const connection = document.getElementById("connection");
+      const updated = document.getElementById("updated");
+      try {
+        const liveRes = await fetch("/api/readings?limit=600&since_s=600", { cache: "no-store" });
+        const liveData = await liveRes.json();
+        if (!liveRes.ok || !liveData.ok) throw new Error(liveData.error || "request failed");
+        state.liveRows = liveData.rows;
+        renderLatest(liveData.rows[0]);
+        renderLiveChart(liveData.rows);
+        renderControlState(liveData.rows[0]);
+
+        const limit = Math.min(state.rangeSeconds * 2, 100000);
+        const res = await fetch("/api/readings?limit=" + limit + "&since_s=" + state.rangeSeconds, { cache: "no-store" });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "request failed");
+        state.analysisRows = data.rows;
+        renderAnalysisChart(data.rows);
+        renderSummary(data.rows);
+        renderTable(steadyRows(data.rows));
+        connection.textContent = "DB rows: " + data.count + " / \ud45c\uc2dc " + data.rows.length;
+        updated.textContent = "\uac31\uc2e0: " + new Date().toLocaleTimeString("ko-KR");
+      } catch (err) {
+        connection.textContent = "\uc5f0\uacb0 \uc2e4\ud328";
+        updated.textContent = err.message;
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        state.activeTab = btn.dataset.tab;
+        document.querySelectorAll(".tab").forEach(function(t) { t.classList.toggle("active", t === btn); });
+        document.querySelectorAll(".view").forEach(function(v) { v.classList.toggle("active", v.id === state.activeTab); });
+        setTimeout(function() { state.liveChart && state.liveChart.resize(); state.analysisChart && state.analysisChart.resize(); }, 30);
+      });
+    });
+
+    document.querySelectorAll("#rangeButtons button").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        state.rangeSeconds = Number(btn.dataset.seconds);
+        document.querySelectorAll("#rangeButtons button").forEach(function(b) { b.classList.toggle("active", b === btn); });
+        refresh();
+      });
+    });
+
+    document.querySelectorAll("#chartMode button").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        state.chartMode = btn.dataset.mode;
+        document.querySelectorAll("#chartMode button").forEach(function(b) { b.classList.toggle("active", b === btn); });
+        if (state.analysisRows.length) renderAnalysisChart(state.analysisRows);
+      });
+    });
+
+    document.querySelectorAll("#smoothing button").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        state.smoothStep = Number(btn.dataset.smooth);
+        document.querySelectorAll("#smoothing button").forEach(function(b) { b.classList.toggle("active", b === btn); });
+        if (state.analysisRows.length) renderAnalysisChart(state.analysisRows);
+      });
+    });
+
+    document.getElementById("autoRefresh").addEventListener("click", function(e) {
+      state.autoRefresh = !state.autoRefresh;
+      e.currentTarget.classList.toggle("active", state.autoRefresh);
+      e.currentTarget.textContent = state.autoRefresh ? "\uc790\ub3d9 \uac31\uc2e0 ON" : "\uc790\ub3d9 \uac31\uc2e0 OFF";
+    });
+
+    document.getElementById("steadyStart").addEventListener("change", function(e) {
+      state.steadyStart = e.target.value ? new Date(e.target.value) : null;
+      const badge = document.getElementById("steadyBadge");
+      if (state.steadyStart) {
+        badge.textContent = "\uc124\uc815\ub428: " + state.steadyStart.toLocaleString("ko-KR");
+        badge.className = "steady-badge";
+      } else {
+        badge.textContent = "";
+        badge.className = "";
+      }
+      if (state.analysisRows.length) {
+        renderAnalysisChart(state.analysisRows);
+        renderSummary(state.analysisRows);
+        renderTable(steadyRows(state.analysisRows));
+      }
+    });
+
+    document.getElementById("clearSteady").addEventListener("click", function() {
+      state.steadyStart = null;
+      document.getElementById("steadyStart").value = "";
+      document.getElementById("steadyBadge").textContent = "";
+      document.getElementById("steadyBadge").className = "";
+      if (state.analysisRows.length) {
+        renderAnalysisChart(state.analysisRows);
+        renderSummary(state.analysisRows);
+        renderTable(state.analysisRows);
+      }
+    });
+
+    window.addEventListener("resize", function() {
+      state.liveChart && state.liveChart.resize();
+      state.analysisChart && state.analysisChart.resize();
+    });
+
+    refresh();
+    setInterval(function() { if (state.autoRefresh) refresh(); }, 2000);
+  </script>
+</body>
+</html>
