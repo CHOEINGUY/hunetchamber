@@ -1,66 +1,17 @@
-# 데이터 흐름
+# 데이터 흐름 및 통신 아키텍처 (Data Flow)
 
-## 전체 흐름
+본 시스템은 저전력 마이크로컨트롤러(Pico WH)와 게이트웨이(Pi 4) 간의 효율적인 데이터 교환을 위해 다음과 같은 구조를 가집니다.
 
-```
-[RS485 온습도 센서 addr=1]
-        ↓ RS485 UART0 (9600 baud)
-[Pico WH / RP2040]  ──── RS485 UART1 (115200 baud) ────→  [RP2350 Touch LCD]
-        ↓                                                          ↑
-    Wi-Fi HTTP POST /fridge                              명령 전송 ←── 터치 입력
-        ↓
-[Raspberry Pi :8081]
-   fridge_gateway_server.py
-        ↓ INSERT
-[MariaDB fridge_readings]
-        ↓
-[웹 대시보드 http://192.168.100.30:8081/]
-```
+---
 
-## 제어 방향
+## 📤 1. 상향 스트림 (Pico → Gateway)
+- **주기:** 1,000ms (1Hz)
+- **방식:** HTTP POST (JSON Payload)
+- **특징:** 단순 온습도뿐 아니라 현재 제어 상태(Armed, Auto, SSR Status)와 보호 로직 잔여 시간(Wait Time)을 포함하여 게이트웨이가 장치의 내부 상태를 완벽히 미러링하게 함.
 
-- **Pico**가 온도를 읽고 SSR 출력을 결정한다.
-- **RP2350**은 상태를 표시하고 명령을 Pico에 전달한다.
-- **웹 대시보드**는 읽기 전용 모니터링이다 (제어 명령 경로 없음).
-- **Wi-Fi/DB 전송 실패**는 Pico의 제어 루프에 영향을 주지 않는다.
+## 📥 2. 하향 스트림 (Gateway → Pico) - 'Response Injection'
+- **방식:** Pico가 POST를 보낸 직후의 **HTTP Response body**에 명령을 주입하여 전달.
+- **이유:** Pico가 서버 역할을 하여 포트를 개방할 경우 보안 취약점이 발생할 수 있으므로, 클라이언트 요청에 응답을 싣는 방식을 채택하여 방화벽/네트워크 설정 문제를 원천 차단함.
 
-이유: DB/네트워크 장애가 냉장고 제어를 멈추게 하면 안 되기 때문이다.
-
-## 로깅 경로
-
-| 항목 | 값 |
-|---|---|
-| 게이트웨이 IP:Port | 192.168.100.30:8081 |
-| 엔드포인트 | POST /fridge |
-| 기록 주기 | 1초 (테스트 단계) |
-| DB 테이블 | fridge_readings |
-| 대시보드 | http://192.168.100.30:8081/ |
-| 헬스 체크 | http://192.168.100.30:8081/health |
-| API | http://192.168.100.30:8081/api/readings?limit=50 |
-
-## DB 주요 컬럼
-
-| 컬럼 | 내용 |
-|---|---|
-| created_at | 기록 시각 |
-| device_id | 기기 ID (fridge-01) |
-| temp_c | 센서 온도 |
-| humidity | 습도 |
-| target_c | 목표 온도 |
-| fridge_on | SSR 출력 상태 (0/1) |
-| armed | armed 상태 (0/1) |
-| auto_mode | 자동 제어 상태 (0/1) |
-| reason | 상태 변화 이유 |
-
-## Pico STATUS 프로토콜
-
-Pico가 RP2350에 2초 주기로 전송하는 상태 줄 형식:
-
-```text
-STATUS on=0 armed=0 auto=0 target_c=15.0 band_c=0.5 min_off_s=300 wait_on_s=0 min_on_s=300 wait_off_s=0 state_elapsed_s=311 temp_c=26.8 humidity=38.2 sensor_age_s=6 fan=0 led=0 reason=boot
-```
-
-## 보안 설계
-
-- DB 접속 정보(비밀번호)는 Raspberry Pi에만 있다. Pico는 HTTP POST만 사용한다.
-- Wi-Fi 비밀번호는 `controller/pico_wh/wifi_config.py`에만 있으며 `.gitignore` 포함이다.
+## 💾 3. 저장 및 시각화
+- **DB:** MariaDB에 고해상도(1s)로 적재하여, 추후 냉각 효율 분석 및 기기 고장 예후 진단(Predictive Maintenance)을 위한 기초 데이터 확보.

@@ -1,45 +1,51 @@
-# 🏛️ Hunet Chamber Project Workspace
+# 🏛️ Hunet Chamber Project Workspace (2026)
 
-이 워크스페이스는 농장 환경 제어 및 모니터링을 위한 여러 하부 프로젝트를 포함하고 있습니다.
-
----
-
-## 📂 프로젝트 구조 (Projects)
-
-| 프로젝트 | 설명 | 주요 기술 |
-| :--- | :--- | :--- |
-| **[🧊 Fridge Controller](./projects/fridge_controller)** | 냉장고 정밀 온도 제어 및 안전 시스템 | Pico WH, RS485, React, MariaDB |
-| **[🌾 Farm Gateway](./projects/farm_sensor_gateway)** | 농장 온습도/CO2 센서 수집 게이트웨이 | Raspberry Pi, Python, W5500 |
+본 워크스페이스는 농장 환경 제어 및 냉장고 정밀 제어 시스템의 통합 관리 저장소입니다. 
+**최인규 연구원**이 진행한 한 달간의 하드웨어 설계, 제어 로직 실험 및 데이터 게이트웨이 구축 결과가 정리되어 있습니다.
 
 ---
 
-## 📚 연구 기록 (Research Records)
+## 📢 부장님을 위한 프로젝트 요약 (Executive Summary)
 
-프로젝트의 진행 과정과 기술적 의사결정을 날짜별로 기록한 문서입니다.
-- **[✍️ 연구일지 (Research Diary)](./research_diary)**: 2026-04-20부터 현재까지의 일일 연구 기록 (기록자: 최인규).
+### 1. 로직 실험 및 검증 완료 (Current Progress)
+단순 수집을 넘어, 실제 기동 제어에 필요한 핵심 로직들이 하드웨어 레벨에서 검증되었습니다.
+- **냉장고 보호 로직:** 컴프레셔 소손 방지를 위한 '300초 최소 ON/OFF' 강제 보호 모드 동작 확인.
+- **비대칭 히스테리시스:** 냉각 관성(Undershoot) 분석을 통해 상/하한 온도를 다르게 제어하는 비대칭 밴드 로직 최적화.
+- **Fail-safe 시스템:** 센서 데이터 유실 시 시스템을 안전 모드로 전환하는 로깅 및 제어 홀드 로직 구현.
+- **실시간 데이터 파이프라인:** 1초 주기의 데이터를 MariaDB에 적재하고 웹 대시보드로 시각화하는 전체 경로(Pico→Gateway→DB→Web) 완성.
 
----
-
-## 📦 공용 및 외부 라이브러리 (Shared & Vendor)
-
-- **[`/shared`](./shared)**: 여러 프로젝트에서 공통으로 사용하는 유틸리티 및 설정.
-- **[`/vendor`](./vendor)**: 외부 하드웨어 제조사 SDK 및 타사 라이브러리.
-  - [`waveshare_lcd_sdk`](./vendor/waveshare_lcd_sdk): RP2350 Touch LCD 4인치용 BSP 및 예제.
-
----
-
-## 📜 아카이브 (Archive)
-
-과거의 코드, 레거시 구현체 및 참조용 백업 데이터는 **[`/archive`](./archive)** 폴더에서 확인할 수 있습니다.
-- [Farm Gateway Legacy](./archive/farm_sensor_gateway)
-- [Fridge Controller Archive](./archive/fridge_controller)
+### 2. 전략적 폴더 구조 재편성 (Architecture)
+유지보수 효율성과 지식 자산화를 위해 다음과 같이 구조를 리팩토링했습니다.
+- **[`/projects`](./projects)**: 독립적인 제어 시스템(냉장고, 농장 게이트웨이)별로 코드를 격리하여 확장성 확보.
+- **[`/research_diary`](./research_diary)**: 4/20부터 오늘까지의 **19일간 모든 기술적 의사결정**을 일지로 남겨 히스토리 추적 가능.
+- **[`/shared`](./shared) & [`/vendor`](./vendor)**: 공용 도구와 외부 라이브러리를 분리하여 코드 중복 최소화.
 
 ---
 
-## 🛠️ 워크스페이스 관리
+## 📂 프로젝트 바로가기 (Project Links)
 
-- **보안:** Wi-Fi SSID, DB 비밀번호 등 민감정보는 절대 커밋하지 않습니다. 각 프로젝트의 `README.md` 내 '민감정보 관리' 섹션을 참고하세요.
-- **추가:** 새로운 제어 장치가 추가될 경우 `projects/` 폴더 내에 별도 프로젝트로 구성합니다.
+### 🧊 [냉장고 정밀 제어 시스템 (Fridge Controller)](./projects/fridge_controller)
+- **핵심:** 온도 제어 알고리즘 및 컴프레셔 보호 로직.
+- **상태:** **실전 테스트 가동 중.**
+- **리뷰 포인트:** `README.md` 상단의 안전 로직 섹션 참고.
+
+### 🌾 [농장 센서 게이트웨이 (Farm Gateway)](./projects/farm_sensor_gateway)
+- **핵심:** 4종 센서(온습도, 토양, 조도, CO2) RS485 통합 수집.
+- **상태:** **안정화 단계.**
+- **리뷰 포인트:** W5500 이더넷 자동 복구 로직.
 
 ---
-*Last Updated: 2026-05-14*
+
+## 📚 연구 및 설계 자산 (Knowledge Base)
+
+- **[✍️ 일일 연구일지 (Research Diary)](./research_diary)**: 최인규 연구원이 겪은 시행착오와 해결 방법이 날짜별로 기록되어 있습니다.
+- **[📜 레거시 아카이브 (Archive)](./archive)**: 초기 프로토타입 및 과거 구현체 보관.
+
+---
+
+## 🛠️ 관리 지침
+- **보안:** 모든 민감 정보(비밀번호 등)는 환경변수 및 로컬 설정파일로 격리하여 보안 사고를 예방했습니다.
+- **검증:** 각 프로젝트 하위의 `tests/` 폴더를 통해 개별 하드웨어 기능을 검증할 수 있습니다.
+
+---
+*기록자: 최인규 연구원 (2026-05-14)*
