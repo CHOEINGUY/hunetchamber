@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>디스플레이 측 빵판 배치도 — RP2350 + W5500</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #1e1e2e;
+    color: #eee;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { color: #f9e2af; margin-bottom: 6px; }
+  .subtitle { color: #888; margin-bottom: 24px; font-size: 14px; }
+  .warning {
+    background: #4a1e1e;
+    border-left: 4px solid #f38ba8;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    max-width: 1100px;
+    color: #fcd5d5;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .container { background: #2a2a3a; padding: 20px; border-radius: 12px; }
+  svg { display: block; }
+  .pin-table {
+    margin-top: 20px;
+    max-width: 1100px;
+    width: 100%;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .pin-table h2 { margin: 0 0 12px; color: #89b4fa; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid #334155;
+  }
+  th { background: #0f172a; color: #94a3b8; }
+  td .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    background: #312e81;
+    color: #a5b4fc;
+  }
+  .todo { color: #fbbf24; font-weight: bold; }
+  .note {
+    margin-top: 20px;
+    max-width: 1100px;
+    padding: 14px 18px;
+    background: #1e293b;
+    border-radius: 8px;
+    border-left: 4px solid #a6e3a1;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .note strong { color: #a6e3a1; }
+</style>
+</head>
+<body>
+
+<h1>🖥 디스플레이 측 빵판 배치 — RP2350-Touch-LCD-4 + W5500</h1>
+<div class="subtitle">양액 시스템과 별도 회사망에 LAN으로 연결</div>
+
+<div class="warning">
+  <strong>⚠ 확인 필요</strong>: Waveshare 위키 접속이 막혀서 RP2350-Touch-LCD-4의 정확한 외부 GPIO 핀맵을 가져오지 못함.
+  아래 GP 번호는 일반 RP2350 보드 패턴 기반의 <strong>추정치</strong>임.
+  실제 보드의 외부 헤더 핀 배치를 위키 또는 보드 PCB 실크스크린에서 직접 확인 후 수정해야 함.<br>
+  ⚠ <strong>LCD가 내부적으로 점유한 GP 번호 피해야 함</strong> (보통 GP0~GP19 영역).
+  외부 헤더는 GP20 이상 또는 specific 핀이 노출됨.
+</div>
+
+<div class="container">
+<svg width="1100" height="600" viewBox="0 0 1100 600">
+
+  <!-- ===== RP2350-Touch-LCD-4 보드 ===== -->
+  <g transform="translate(50, 50)">
+    <rect x="0" y="0" width="380" height="500" rx="12" fill="#3a2e1e" stroke="#f9e2af" stroke-width="2"/>
+    <text x="190" y="24" text-anchor="middle" fill="#f9e2af" font-size="14" font-weight="bold">RP2350-Touch-LCD-4 보드</text>
+
+    <!-- 4" LCD 화면 -->
+    <rect x="30" y="40" width="320" height="280" rx="6" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+    <text x="190" y="70" text-anchor="middle" fill="#f9e2af" font-size="12" font-weight="bold">4" IPS LCD (480×480)</text>
+    <text x="190" y="86" text-anchor="middle" fill="#aaa" font-size="10">5-point Touch</text>
+
+    <!-- LCD 미리보기 컨텐츠 -->
+    <g>
+      <rect x="50" y="100" width="135" height="55" rx="4" fill="#1e3a2a"/>
+      <text x="118" y="120" text-anchor="middle" fill="#a6e3a1" font-size="11" font-weight="bold">EC: 1.20</text>
+      <text x="118" y="138" text-anchor="middle" fill="#94a3b8" font-size="9">목표 1.0~1.2</text>
+
+      <rect x="195" y="100" width="135" height="55" rx="4" fill="#1e3a2a"/>
+      <text x="263" y="120" text-anchor="middle" fill="#a6e3a1" font-size="11" font-weight="bold">습도: 65%</text>
+      <text x="263" y="138" text-anchor="middle" fill="#94a3b8" font-size="9">온도: 23.5°C</text>
+
+      <rect x="50" y="165" width="135" height="50" rx="4" fill="#3a2a1e"/>
+      <text x="118" y="184" text-anchor="middle" fill="#fab387" font-size="11">💡 LED: 50%</text>
+      <text x="118" y="202" text-anchor="middle" fill="#fab387" font-size="9">↑ ↓ 조정</text>
+
+      <rect x="195" y="165" width="135" height="50" rx="4" fill="#3a2a1e"/>
+      <text x="263" y="184" text-anchor="middle" fill="#fab387" font-size="11">🌀 팬: 30%</text>
+      <text x="263" y="202" text-anchor="middle" fill="#fab387" font-size="9">↑ ↓ 조정</text>
+
+      <rect x="50" y="225" width="280" height="40" rx="6" fill="#312e81" stroke="#a5b4fc"/>
+      <text x="190" y="249" text-anchor="middle" fill="#a5b4fc" font-size="14" font-weight="bold">▶ 혼합 시작</text>
+
+      <text x="190" y="285" text-anchor="middle" fill="#94a3b8" font-size="9">↑ 실제 UI는 LVGL 또는 자체 그래픽 라이브러리로</text>
+    </g>
+
+    <!-- 외부 헤더 (보드 가장자리) -->
+    <text x="40" y="345" fill="#94a3b8" font-size="10">외부 헤더 (LCD 미점유 GP만 노출):</text>
+    <g font-size="9" fill="#fff">
+      <!-- 좌측 헤더 -->
+      <circle cx="50" cy="365" r="4" fill="#d4af37"/><text x="60" y="368">3V3 OUT</text>
+      <circle cx="50" cy="385" r="4" fill="#666"/><text x="60" y="388">GND</text>
+      <circle cx="50" cy="405" r="4" fill="#d4af37"/><text x="60" y="408" class="todo">GP?? SCK ⚠</text>
+      <circle cx="50" cy="425" r="4" fill="#d4af37"/><text x="60" y="428" class="todo">GP?? MOSI ⚠</text>
+      <circle cx="50" cy="445" r="4" fill="#d4af37"/><text x="60" y="448" class="todo">GP?? MISO ⚠</text>
+      <circle cx="50" cy="465" r="4" fill="#d4af37"/><text x="60" y="468" class="todo">GP?? CS ⚠</text>
+      <circle cx="50" cy="485" r="4" fill="#d4af37"/><text x="60" y="488" class="todo">GP?? RST (옵션)</text>
+    </g>
+
+    <!-- 우측: USB / SD / 기타 -->
+    <g>
+      <rect x="280" y="370" width="40" height="20" fill="#888"/>
+      <text x="300" y="384" text-anchor="middle" fill="#000" font-size="9">USB-C</text>
+
+      <rect x="280" y="400" width="40" height="20" fill="#444" stroke="#666"/>
+      <text x="300" y="414" text-anchor="middle" fill="#fff" font-size="9">TF</text>
+
+      <text x="295" y="460" text-anchor="middle" fill="#aaa" font-size="9">RS485</text>
+      <text x="295" y="475" text-anchor="middle" fill="#666" font-size="8">(이번엔 안 씀)</text>
+    </g>
+  </g>
+
+  <!-- ===== W5500 모듈 (라벨: MO/MI/SCS/SCK/RST/INT) ===== -->
+  <g transform="translate(530, 200)">
+    <rect x="0" y="0" width="180" height="200" rx="8" fill="#1e3a5f" stroke="#89b4fa" stroke-width="2"/>
+    <text x="90" y="24" text-anchor="middle" fill="#89b4fa" font-size="13" font-weight="bold">W5500 #2</text>
+    <text x="90" y="40" text-anchor="middle" fill="#aaa" font-size="10">디스플레이용 (절충 라벨)</text>
+
+    <g font-size="10" fill="#fff">
+      <text x="10" y="62">VCC ← 3V3</text>
+      <text x="10" y="78">GND ← GND</text>
+      <text x="10" y="94">SCK ← GP??</text>
+      <text x="10" y="110">MO  ← GP?? (MOSI)</text>
+      <text x="10" y="126">MI  → GP?? (MISO)</text>
+      <text x="10" y="142">SCS ← GP?? (CS)</text>
+      <text x="10" y="158">RST ← GP?? (옵션)</text>
+      <text x="10" y="174">INT → GP?? (옵션)</text>
+    </g>
+
+    <!-- RJ45 -->
+    <rect x="115" y="170" width="55" height="25" fill="#333" stroke="#888"/>
+    <text x="142" y="186" text-anchor="middle" fill="#fff" font-size="10">RJ45</text>
+  </g>
+
+  <!-- ===== 회사망 스위치 ===== -->
+  <g transform="translate(830, 240)">
+    <rect x="0" y="0" width="220" height="100" rx="8" fill="#312e81" stroke="#a5b4fc" stroke-width="2"/>
+    <text x="110" y="28" text-anchor="middle" fill="#a5b4fc" font-size="13" font-weight="bold">회사망 스위치</text>
+    <text x="110" y="45" text-anchor="middle" fill="#aaa" font-size="10">192.168.0.0/24</text>
+
+    <g fill="#374151" stroke="#9ca3af">
+      <rect x="20" y="60" width="22" height="18"/>
+      <rect x="52" y="60" width="22" height="18"/>
+      <rect x="84" y="60" width="22" height="18"/>
+      <rect x="116" y="60" width="22" height="18"/>
+      <rect x="148" y="60" width="22" height="18"/>
+      <rect x="180" y="60" width="22" height="18"/>
+    </g>
+    <text x="33" y="92" text-anchor="middle" fill="#a6e3a1" font-size="9">← Pico</text>
+    <text x="65" y="92" text-anchor="middle" fill="#f9e2af" font-size="9">← 디스</text>
+    <text x="180" y="92" text-anchor="middle" fill="#cba6f7" font-size="9">DB</text>
+  </g>
+
+  <!-- ===== 와이어들 ===== -->
+  <!-- 디스플레이 → W5500 (SPI 4선) -->
+  <path d="M 100 405 L 530 215" stroke="#89b4fa" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/>
+  <path d="M 100 425 L 530 232" stroke="#89b4fa" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/>
+  <path d="M 100 445 L 530 249" stroke="#89b4fa" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/>
+  <path d="M 100 465 L 530 266" stroke="#89b4fa" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/>
+  <text x="300" y="350" fill="#89b4fa" font-size="10">SPI ×4 + 3V3 + GND</text>
+
+  <!-- 3V3 + GND -->
+  <path d="M 100 365 L 530 215" stroke="#f38ba8" stroke-width="1.5" fill="none"/>
+  <path d="M 100 385 L 530 232" stroke="#666" stroke-width="1.5" fill="none"/>
+
+  <!-- W5500 → 스위치 (LAN 케이블) -->
+  <path d="M 700 290 Q 770 290 770 290 L 830 290" stroke="#a5b4fc" stroke-width="3" fill="none"/>
+  <text x="765" y="282" text-anchor="middle" fill="#a5b4fc" font-size="11" font-weight="bold">LAN 케이블</text>
+</svg>
+</div>
+
+<!-- 핀 매핑 표 -->
+<div class="pin-table">
+  <h2>📋 RP2350 ↔ W5500 결선표 <span class="todo">(GP 번호 ⚠ 확인 필요)</span></h2>
+  <table>
+    <thead>
+      <tr><th>W5500 라벨 (절충형)</th><th>RP2350 핀 (추정)</th><th>설명</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>VCC</td><td>3V3 OUT</td><td>전원 (3.3V, 5V 절대 X)</td></tr>
+      <tr><td>GND</td><td>GND</td><td>공통 접지</td></tr>
+      <tr><td>SCK</td><td><span class="todo">GP??</span></td><td>SPI 클럭</td></tr>
+      <tr><td><strong>MO</strong> (=MOSI)</td><td><span class="todo">GP??</span></td><td>마스터→슬레이브 데이터</td></tr>
+      <tr><td><strong>MI</strong> (=MISO)</td><td><span class="todo">GP??</span></td><td>슬레이브→마스터 데이터</td></tr>
+      <tr><td><strong>SCS</strong> (=CS)</td><td><span class="todo">GP??</span></td><td>칩 선택 (Active LOW)</td></tr>
+      <tr><td>RST</td><td><span class="todo">GP?? (옵션)</span></td><td>리셋 (없어도 동작)</td></tr>
+      <tr><td>INT</td><td><span class="todo">GP?? (옵션)</span></td><td>인터럽트 (폴링이면 X)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note">
+  <strong>📌 다음 단계</strong><br>
+  1. <strong>Waveshare 위키 직접 접속</strong> (브라우저로 <code>www.waveshare.com/wiki/RP2350-Touch-LCD-4</code>) → 외부 헤더 핀맵 사진 또는 PDF 다운로드.<br>
+  2. <strong>LCD 점유 핀 파악</strong> → 회피해서 W5500용 SPI 4핀 + CS 1핀 = 총 5핀 확보.<br>
+  3. <strong>핀 번호 확정 후</strong> 이 HTML의 ⚠ 마크 부분 수정해서 영구 참고용으로 보관.<br>
+  4. <strong>코드 측</strong>: W5500 라이브러리 (<code>WIZNET5K</code> 또는 MicroPython 내장) + HTTP 클라이언트 (<code>urequests</code>) 설치.<br>
+  5. <strong>네트워크 설정</strong>: Pico의 IP 알아내서 디스플레이 코드에 하드코딩 또는 DHCP+mDNS.<br>
+  <br>
+  <strong>🔌 회로 핵심</strong><br>
+  • 디스플레이 측 W5500 → SPI 4선 + 3V3 + GND = 총 6선만 결선<br>
+  • 디스플레이는 5V USB 또는 외부 어댑터로 전원 공급 (양액 시스템과 별개)<br>
+  • LAN 케이블 한 가닥으로 회사망 스위치 연결<br>
+  • Pico W의 W5500과 같은 네트워크에 있으면 통신 가능
+</div>
+
+</body>
+</html>

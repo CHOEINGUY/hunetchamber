@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pico W 통합 핀맵</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #1e1e2e;
+    color: #eee;
+    margin: 0;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { color: #89b4fa; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 30px; }
+
+  .board-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 40px;
+  }
+
+  /* 좌측 라벨 영역 */
+  .labels-left, .labels-right {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .labels-left { align-items: flex-end; padding-right: 12px; }
+  .labels-right { align-items: flex-start; padding-left: 12px; }
+
+  .label {
+    height: 26px;
+    line-height: 26px;
+    padding: 0 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 220px;
+    text-align: right;
+  }
+  .labels-right .label { text-align: left; }
+
+  /* 그룹별 색상 */
+  .grp-eth   { background: #1e3a5f; color: #89b4fa; border-left: 4px solid #89b4fa; }
+  .grp-rs485 { background: #1e4a3a; color: #a6e3a1; border-left: 4px solid #a6e3a1; }
+  .grp-mos   { background: #4a3a1e; color: #fab387; border-left: 4px solid #fab387; }
+  .grp-mos2  { background: #3a2a4a; color: #cba6f7; border-left: 4px solid #cba6f7; }
+  .grp-pwm   { background: #4a4a1e; color: #f9e2af; border-left: 4px solid #f9e2af; }
+  .grp-pwr   { background: #4a1e3a; color: #f5c2e7; border-left: 4px solid #f5c2e7; }
+  .grp-gnd   { background: #2a2a2a; color: #888; border-left: 4px solid #555; }
+  .grp-free  { background: #2a2a3a; color: #777; border-left: 4px solid #444; }
+  .grp-adc   { background: #1e404a; color: #94e2d5; border-left: 4px solid #94e2d5; }
+
+  .labels-right .label { border-left: none; border-right: 4px solid; }
+  .labels-right .grp-eth   { border-right-color: #89b4fa; }
+  .labels-right .grp-rs485 { border-right-color: #a6e3a1; }
+  .labels-right .grp-mos   { border-right-color: #fab387; }
+  .labels-right .grp-mos2  { border-right-color: #cba6f7; }
+  .labels-right .grp-pwm   { border-right-color: #f9e2af; }
+  .labels-right .grp-pwr   { border-right-color: #f5c2e7; }
+  .labels-right .grp-gnd   { border-right-color: #555; }
+  .labels-right .grp-free  { border-right-color: #444; }
+  .labels-right .grp-adc   { border-right-color: #94e2d5; }
+
+  /* 보드 */
+  .board {
+    width: 200px;
+    background: linear-gradient(135deg, #2d4a2d 0%, #1e3a1e 100%);
+    border-radius: 16px;
+    padding: 20px 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    border: 1px solid #3a5a3a;
+    position: relative;
+  }
+  .usb {
+    width: 60px;
+    height: 24px;
+    background: #c0c0c0;
+    border-radius: 4px;
+    margin: -34px auto 14px;
+    border: 2px solid #888;
+  }
+  .board-title {
+    text-align: center;
+    color: #a6e3a1;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+  .pins {
+    display: flex;
+    justify-content: space-between;
+  }
+  .pin-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .pin {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #d4af37;
+    border: 2px solid #8a7020;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #2a2a2a;
+  }
+  .bootsel {
+    text-align: center;
+    margin-top: 14px;
+    background: #1a3a1a;
+    border-radius: 4px;
+    padding: 4px;
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 1px;
+  }
+
+  /* 범례 */
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 900px;
+    width: 100%;
+  }
+  .legend-item {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .legend-item h3 {
+    margin: 0 0 6px;
+    font-size: 14px;
+  }
+  .legend-item p {
+    margin: 0;
+    color: #aaa;
+    font-size: 12px;
+  }
+  .note {
+    margin-top: 30px;
+    max-width: 900px;
+    padding: 16px 20px;
+    background: #2a2a3a;
+    border-radius: 8px;
+    border-left: 4px solid #f9e2af;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #ccc;
+  }
+  .note strong { color: #f9e2af; }
+  .star { color: #f38ba8; }
+</style>
+</head>
+<body>
+
+<h1>Raspberry Pi Pico W 통합 핀맵 — 양액 시스템 측</h1>
+<div class="subtitle">양액 자동조제 + 점적관수 시스템 (W5500 이더넷 + RS485 센서 + 펌프 4ch + LED + 팬)<br>
+📍 디스플레이 측: 기본 <a href="display_layout.html" style="color:#f9e2af">이더넷</a> / 대안 <a href="display_rs485_layout.html" style="color:#a6e3a1">RS485</a> · 토폴로지 <a href="network_topology.html" style="color:#89b4fa">network_topology.html</a></div>
+
+<div class="board-wrap">
+
+  <!-- 좌측 라벨 (핀 1~20) -->
+  <div class="labels-left">
+    <div class="label grp-free">UART0 TX · GP0 <span style="color:#a6e3a1">↓RS485 대안</span></div>
+    <div class="label grp-free">UART0 RX · GP1 <span style="color:#a6e3a1">↓RS485 대안</span></div>
+    <div class="label grp-gnd">GND</div>
+    <div class="label grp-eth">W5500 SCK · GP2</div>
+    <div class="label grp-eth">W5500 MO (MOSI) · GP3</div>
+    <div class="label grp-eth">W5500 MI (MISO) · GP4</div>
+    <div class="label grp-eth">W5500 SCS (CS) · GP5</div>
+    <div class="label grp-gnd">GND</div>
+    <div class="label grp-eth">W5500 RST · GP6</div>
+    <div class="label grp-eth">W5500 INT · GP7</div>
+    <div class="label grp-rs485">RS485 #1 RX · GP8 (Pico TX)</div>
+    <div class="label grp-rs485">RS485 #1 TX · GP9 (Pico RX)</div>
+    <div class="label grp-gnd">GND</div>
+    <div class="label grp-free">GP10 (자동방향 모듈, 미사용)</div>
+    <div class="label grp-mos2">교반기 (2번 4ch CH1) · GP11</div>
+    <div class="label grp-mos">펌프 CH4 다이어프램 (1번 CH4) · GP12</div>
+    <div class="label grp-mos">펌프 CH3 Kamoer B (1번 CH3) · GP13 ★PWM</div>
+    <div class="label grp-gnd">GND</div>
+    <div class="label grp-mos">펌프 CH2 Kamoer A (1번 CH2) · GP14 ★PWM</div>
+    <div class="label grp-mos">펌프 CH1 KPHM100 (1번 CH1) · GP15</div>
+  </div>
+
+  <!-- 보드 -->
+  <div class="board">
+    <div class="usb"></div>
+    <div class="board-title">Pico W</div>
+    <div class="pins">
+      <div class="pin-col">
+        <div class="pin">1</div>
+        <div class="pin">2</div>
+        <div class="pin">3</div>
+        <div class="pin">4</div>
+        <div class="pin">5</div>
+        <div class="pin">6</div>
+        <div class="pin">7</div>
+        <div class="pin">8</div>
+        <div class="pin">9</div>
+        <div class="pin">10</div>
+        <div class="pin">11</div>
+        <div class="pin">12</div>
+        <div class="pin">13</div>
+        <div class="pin">14</div>
+        <div class="pin">15</div>
+        <div class="pin">16</div>
+        <div class="pin">17</div>
+        <div class="pin">18</div>
+        <div class="pin">19</div>
+        <div class="pin">20</div>
+      </div>
+      <div class="pin-col">
+        <div class="pin">40</div>
+        <div class="pin">39</div>
+        <div class="pin">38</div>
+        <div class="pin">37</div>
+        <div class="pin">36</div>
+        <div class="pin">35</div>
+        <div class="pin">34</div>
+        <div class="pin">33</div>
+        <div class="pin">32</div>
+        <div class="pin">31</div>
+        <div class="pin">30</div>
+        <div class="pin">29</div>
+        <div class="pin">28</div>
+        <div class="pin">27</div>
+        <div class="pin">26</div>
+        <div class="pin">25</div>
+        <div class="pin">24</div>
+        <div class="pin">23</div>
+        <div class="pin">22</div>
+        <div class="pin">21</div>
+      </div>
+    </div>
+    <div class="bootsel">BOOTSEL</div>
+  </div>
+
+  <!-- 우측 라벨 (핀 40~21) -->
+  <div class="labels-right">
+    <div class="label grp-pwr">VBUS (미사용)</div>
+    <div class="label grp-pwr">VSYS ◄ LM2596 5V</div>
+    <div class="label grp-gnd">GND</div>
+    <div class="label grp-pwr">3V3_EN</div>
+    <div class="label grp-pwr">3V3 OUT ► W5500, MAX485</div>
+    <div class="label grp-free">ADC_VREF</div>
+    <div class="label grp-adc">GP28 · ADC2 (예약)</div>
+    <div class="label grp-gnd">AGND</div>
+    <div class="label grp-adc">GP27 · ADC1 (예약)</div>
+    <div class="label grp-adc">GP26 · ADC0 (예약)</div>
+    <div class="label grp-free">RUN</div>
+    <div class="label grp-free">GP22 (여유)</div>
+    <div class="label grp-gnd">GND</div>
+    <div class="label grp-free">GP21 (여유)</div>
+    <div class="label grp-free">GP20 (여유) <span style="color:#a6e3a1">↑RS485 DE 대안</span></div>
+    <div class="label grp-free">GP19 (PWM 1B 점유)</div>
+    <div class="label grp-pwm">GP18 ★ 팬 (2번 4ch CH3) PWM 1kHz</div>
+    <div class="label grp-gnd">GND</div>
+    <div class="label grp-free">GP17 (PWM 0B 점유)</div>
+    <div class="label grp-pwm">GP16 ★ LED (2번 4ch CH2) PWM 1kHz</div>
+  </div>
+
+</div>
+
+<!-- 범례 -->
+<div class="legend">
+  <div class="legend-item grp-eth">
+    <h3>🟦 이더넷 (W5500)</h3>
+    <p>SPI0: GP2~5 + RST/INT GP6/7<br>→ 회사 DB REST API<br>→ RP2350 디스플레이(JSON API)</p>
+  </div>
+  <div class="legend-item grp-rs485">
+    <h3>🟩 센서 (RS485 Modbus RTU)</h3>
+    <p>UART1: GP8/9 + DE/RE GP10, 9600bps<br>현재: 온습도(addr1) / 토양수분(addr2) / EC(addr3)<br>+ pH(예정, addr4)</p>
+  </div>
+  <div class="legend-item grp-mos">
+    <h3>🟧 펌프 (1번 4ch MOSFET)</h3>
+    <p>GP12~15 → CH4/3/2/1<br>다이어프램·KamB·KamA·KPHM100<br>★ CH2/3 (양액) = PWM 33% 1kHz</p>
+  </div>
+  <div class="legend-item grp-mos2">
+    <h3>🟪 교반기 (2번 4ch MOSFET CH1)</h3>
+    <p>GP11 → ON/OFF<br>2번 모듈 CH4는 예비 (pH 등)</p>
+  </div>
+  <div class="legend-item grp-pwm">
+    <h3>🟨 PWM 부하 (2번 4ch MOSFET)</h3>
+    <p>GP16 → CH2 LED (1kHz, slice 0A)<br>GP18 → CH3 팬 (1kHz, slice 1A)<br>※ SZH-AT021 옵토 한계 1~2kHz</p>
+  </div>
+  <div class="legend-item grp-pwr">
+    <h3>🟪 전원</h3>
+    <p>VSYS ◄ LM2596 5V<br>3V3 OUT ► W5500, MAX485</p>
+  </div>
+  <div class="legend-item grp-adc">
+    <h3>🟫 ADC 예약</h3>
+    <p>GP26/27/28<br>→ 조도센서 등 향후 확장</p>
+  </div>
+  <div class="legend-item grp-gnd">
+    <h3>⬛ GND</h3>
+    <p>모든 GND 공통 (스타 그라운드)<br>물리핀 3/8/13/18/23/28/38</p>
+  </div>
+  <div class="legend-item grp-free">
+    <h3>⬜ 여유</h3>
+    <p>GP0/1 UART0, GP17/19 (PWM slice 짝꿍)<br>GP20~22 디지털 확장용</p>
+  </div>
+</div>
+
+<div class="note">
+  <strong>⚠ 주요 주의사항</strong><br>
+  • <strong>4ch MOSFET 모듈 ×2 (SZH-AT021 IRF540N + 포토커플러)</strong>: 1번=펌프 전용(CH1~4), 2번=교반기(CH1)/LED(CH2)/팬(CH3)/예비(CH4).<br>
+  • <strong>PWM 주파수 한계</strong>: 옵토커플러 응답시간 한계로 <strong>1~2 kHz</strong>가 실용 범위 (20 kHz 불가, 듀티 왜곡).<br>
+  • <strong>양액 PWM 도징 (CH2/CH3)</strong>: <strong>1 kHz × 33% duty</strong> → 30 mL/min → 2 mL 4초 (±2.5%). 전호 R&D 레시피 1L 급수당 A/B 2 mL.<br>
+  • <strong>실측 펌프 유량 (2026-05-14)</strong>: CH1 KPHM100-HB = 100 mL/min ✓ 스펙 일치, CH2/3 NKP-DC-B06B = 90 mL/min ✓ 풀속도.<br>
+  • <strong>RS485 센서 (3개 보유)</strong>: 온습도(addr 1, 검증 OK) / 토양수분(addr 2, ⚠레지스터 확인) / EC(addr 3, ⚠). pH 도착 후 addr 4 추가.<br>
+  • <strong>센서 addr 충돌</strong>: 출고 기본은 모두 addr=1 → USB-RS485 도구로 1개씩 1/2/3으로 분리 설정 필수.<br>
+  • <strong>RS485 종단저항</strong>: 120Ω을 버스 양 끝에 1개씩 (MAX485 측 + 마지막 센서 측).<br>
+  • <strong>팬 환류 다이오드</strong>: 4ch 모듈 자체에 없으면 팬 채널(2번 모듈 CH3) 출력에 1N5819/1N4007 추가 (캐소드=12V+, 애노드=팬 −).<br>
+  • <strong>전원 용량</strong>: 펌프+LED+팬 동시 피크 ~5A → <strong>12V/5A 어댑터</strong> 권장.<br>
+  • <strong>공통 GND</strong>: 어댑터, 두 MOSFET 모듈, Pico, W5500, MAX485, 센서 GND 모두 한 점에서 묶기 (스타 그라운드).
+</div>
+
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>디스플레이 측 빵판 배치 — RS485 대안 (W5500 안 쓰는 경우)</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #1e1e2e;
+    color: #eee;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { color: #a6e3a1; margin-bottom: 6px; }
+  .subtitle { color: #888; margin-bottom: 24px; font-size: 14px; }
+  .nav {
+    margin-bottom: 16px;
+    font-size: 12px;
+  }
+  .nav a {
+    color: #89b4fa;
+    text-decoration: none;
+    margin: 0 8px;
+  }
+  .alt-badge {
+    display: inline-block;
+    background: #4a3a1e;
+    color: #f9e2af;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+  .container { background: #2a2a3a; padding: 20px; border-radius: 12px; }
+  svg { display: block; }
+  .pin-table {
+    margin-top: 20px;
+    max-width: 1100px;
+    width: 100%;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .pin-table h2 { margin: 0 0 12px; color: #89b4fa; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid #334155;
+  }
+  th { background: #0f172a; color: #94a3b8; }
+  .note {
+    margin-top: 20px;
+    max-width: 1100px;
+    padding: 14px 18px;
+    background: #1e293b;
+    border-radius: 8px;
+    border-left: 4px solid #a6e3a1;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .note strong { color: #a6e3a1; }
+  .compare {
+    margin-top: 20px;
+    max-width: 1100px;
+    width: 100%;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .compare h2 { margin: 0 0 12px; color: #cba6f7; }
+  .compare table th { background: #0f172a; }
+</style>
+</head>
+<body>
+
+<div class="alt-badge">🔁 대안 시나리오 (W5500 #2 안 쓰는 경우)</div>
+
+<h1>🖥 디스플레이 측 빵판 배치 — RS485 (2nd 버스) 방식</h1>
+<div class="subtitle">센서 RS485 버스와 분리된 별도 RS485로 Pico W ↔ RP2350 통신</div>
+
+<div class="nav">
+  💡 기본 방식 (이더넷): <a href="display_layout.html">display_layout.html</a>
+  · Pico 측 빵판: <a href="breadboard_layout.html">breadboard_layout.html</a>
+  · 핀맵: <a href="pico_pinmap.html">pico_pinmap.html</a>
+  · 토폴로지: <a href="network_topology.html">network_topology.html</a>
+</div>
+
+<div class="container">
+<svg width="1100" height="700" viewBox="0 0 1100 700">
+
+  <!-- ===== Pico W (좌측) ===== -->
+  <g transform="translate(40, 100)">
+    <rect x="0" y="0" width="280" height="500" rx="12" fill="#2d4a2d" stroke="#a6e3a1" stroke-width="2"/>
+    <text x="140" y="24" text-anchor="middle" fill="#a6e3a1" font-size="14" font-weight="bold">Pico W (양액 시스템)</text>
+    <text x="140" y="42" text-anchor="middle" fill="#aaa" font-size="11">기존 핀 + UART0/GP20 추가</text>
+
+    <!-- 기존 사용 핀 표시 (간략) -->
+    <g font-size="10" fill="#94a3b8">
+      <rect x="20" y="60" width="240" height="180" rx="6" fill="#1a3a1a" stroke="#475569"/>
+      <text x="140" y="78" text-anchor="middle" fill="#a6e3a1" font-weight="bold">기존 핀 사용 (변경 없음)</text>
+      <text x="30" y="98">SPI0 (GP2~5) → W5500</text>
+      <text x="30" y="115">SPI0 RST/INT (GP6/7)</text>
+      <text x="30" y="132">UART1 (GP8/9) → MAX485 #1 (센서)</text>
+      <text x="30" y="149">DE/RE 센서 (GP10)</text>
+      <text x="30" y="166">교반/펌프 (GP11~15)</text>
+      <text x="30" y="183">LED PWM (GP16)</text>
+      <text x="30" y="200">팬 PWM (GP18)</text>
+      <text x="30" y="223" fill="#94a3b8" font-style="italic">↑ 이 라인들은 그대로 유지</text>
+    </g>
+
+    <!-- 새로 추가되는 핀 -->
+    <g font-size="11" fill="#fff">
+      <rect x="20" y="260" width="240" height="180" rx="6" fill="#3a3a1e" stroke="#f9e2af" stroke-width="2"/>
+      <text x="140" y="282" text-anchor="middle" fill="#f9e2af" font-weight="bold">★ RS485 디스플레이 버스 (신규)</text>
+
+      <circle cx="35" cy="308" r="4" fill="#f9e2af"/>
+      <text x="50" y="312">GP0 → RS485 #2 RX</text>
+
+      <circle cx="35" cy="332" r="4" fill="#f9e2af"/>
+      <text x="50" y="336">GP1 ← RS485 #2 TX</text>
+
+      <text x="50" y="358" fill="#888" font-size="10">GP20: 자동방향 모듈이라 미사용</text>
+
+      <text x="30" y="382" fill="#94a3b8" font-size="10">→ RS485 #2 → 디스플레이 (A/B)</text>
+      <text x="30" y="399" fill="#94a3b8" font-size="10">→ baudrate 115200</text>
+      <text x="30" y="416" fill="#94a3b8" font-size="10">→ JSON 텍스트 프로토콜</text>
+      <text x="30" y="432" fill="#fab387" font-size="10">⚠ USB 시리얼 REPL은 별개 (디버깅 OK)</text>
+    </g>
+
+    <!-- 비고 -->
+    <text x="20" y="465" fill="#94a3b8" font-size="10">USB 시리얼은 별개라 디버깅은 OK</text>
+    <text x="20" y="480" fill="#94a3b8" font-size="10">(GP0/1은 어차피 "여유"였음)</text>
+  </g>
+
+  <!-- ===== RS485 자동방향 모듈 #2 (디스플레이용, 가운데) — 4핀 ===== -->
+  <g transform="translate(400, 280)">
+    <rect x="0" y="0" width="160" height="150" rx="8" fill="#1e4a3a" stroke="#a6e3a1" stroke-width="2"/>
+    <text x="80" y="22" text-anchor="middle" fill="#a6e3a1" font-size="13" font-weight="bold">RS485 #2 (디스)</text>
+    <text x="80" y="38" text-anchor="middle" fill="#aaa" font-size="10">자동방향 4핀 모듈</text>
+
+    <g font-size="10" fill="#fff">
+      <text x="10" y="62">VCC ← 3V3</text>
+      <text x="10" y="78">GND ← GND</text>
+      <text x="10" y="94">RX  ← GP0 (Pico TX)</text>
+      <text x="10" y="110">TX  → GP1 (Pico RX)</text>
+      <text x="10" y="128" fill="#888">GP20 미사용</text>
+    </g>
+
+    <text x="142" y="80" fill="#a6e3a1" font-size="10" font-weight="bold">A</text>
+    <text x="142" y="100" fill="#a6e3a1" font-size="10" font-weight="bold">B</text>
+  </g>
+
+  <!-- ===== RP2350 디스플레이 (우측) ===== -->
+  <g transform="translate(680, 100)">
+    <rect x="0" y="0" width="380" height="500" rx="12" fill="#3a2e1e" stroke="#f9e2af" stroke-width="2"/>
+    <text x="190" y="24" text-anchor="middle" fill="#f9e2af" font-size="14" font-weight="bold">RP2350-Touch-LCD-4</text>
+    <text x="190" y="42" text-anchor="middle" fill="#aaa" font-size="11">RS485 내장 사용 (W5500 X)</text>
+
+    <!-- LCD 미리보기 -->
+    <rect x="30" y="60" width="320" height="240" rx="6" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+    <text x="190" y="80" text-anchor="middle" fill="#f9e2af" font-size="12" font-weight="bold">4" IPS LCD (480×480)</text>
+
+    <g font-size="11">
+      <rect x="50" y="100" width="135" height="50" rx="4" fill="#1e3a2a"/>
+      <text x="118" y="120" text-anchor="middle" fill="#a6e3a1" font-weight="bold">EC: 1.20</text>
+      <text x="118" y="138" text-anchor="middle" fill="#94a3b8" font-size="9">mS/cm</text>
+
+      <rect x="195" y="100" width="135" height="50" rx="4" fill="#1e3a2a"/>
+      <text x="263" y="120" text-anchor="middle" fill="#a6e3a1" font-weight="bold">습도 65%</text>
+      <text x="263" y="138" text-anchor="middle" fill="#94a3b8" font-size="9">23.5°C</text>
+
+      <rect x="50" y="160" width="280" height="35" rx="4" fill="#312e81"/>
+      <text x="190" y="182" text-anchor="middle" fill="#a5b4fc" font-weight="bold">▶ 혼합 시작</text>
+
+      <rect x="50" y="205" width="135" height="30" rx="4" fill="#3a2a1e"/>
+      <text x="118" y="224" text-anchor="middle" fill="#fab387" font-size="10">LED 50%</text>
+
+      <rect x="195" y="205" width="135" height="30" rx="4" fill="#3a2a1e"/>
+      <text x="263" y="224" text-anchor="middle" fill="#fab387" font-size="10">팬 30%</text>
+
+      <text x="190" y="270" text-anchor="middle" fill="#94a3b8" font-size="9">↑ 터치로 조작</text>
+    </g>
+
+    <!-- RS485 단자 -->
+    <g transform="translate(0, 320)">
+      <rect x="30" y="0" width="320" height="80" rx="6" fill="#1a3a3a" stroke="#94e2d5" stroke-width="2"/>
+      <text x="190" y="20" text-anchor="middle" fill="#94e2d5" font-size="13" font-weight="bold">내장 RS485 단자 (사용)</text>
+
+      <g font-size="11" fill="#fff">
+        <circle cx="100" cy="48" r="5" fill="#a6e3a1"/>
+        <text x="100" y="68" text-anchor="middle">A</text>
+
+        <circle cx="190" cy="48" r="5" fill="#a6e3a1"/>
+        <text x="190" y="68" text-anchor="middle">B</text>
+
+        <circle cx="280" cy="48" r="5" fill="#666"/>
+        <text x="280" y="68" text-anchor="middle">GND</text>
+      </g>
+    </g>
+
+    <text x="190" y="430" text-anchor="middle" fill="#94a3b8" font-size="10">RP2350 내부에서:</text>
+    <text x="190" y="445" text-anchor="middle" fill="#94a3b8" font-size="10">UART → MAX485 → A/B 단자 (자동/수동)</text>
+    <text x="190" y="465" text-anchor="middle" fill="#fab387" font-size="10">★ W5500 모듈 안 씀</text>
+    <text x="190" y="480" text-anchor="middle" fill="#94a3b8" font-size="9">(다른 곳에 활용 가능)</text>
+  </g>
+
+  <!-- ===== 와이어 연결 (Pico ↔ RS485 #2) — 2선만 ===== -->
+  <path d="M 320 308 L 400 308" stroke="#f9e2af" stroke-width="2" fill="none"/>
+  <path d="M 320 332 L 400 325" stroke="#f9e2af" stroke-width="2" fill="none"/>
+
+  <!-- RS485 #2 ↔ 디스플레이 (A/B 트위스트페어) -->
+  <path d="M 560 340 L 600 340 L 600 368 L 780 368" stroke="#a6e3a1" stroke-width="3" fill="none"/>
+  <path d="M 560 360 L 600 360 L 600 368 L 780 368" stroke="#a6e3a1" stroke-width="3" fill="none" stroke-dasharray="5,3"/>
+  <text x="660" y="358" text-anchor="middle" fill="#a6e3a1" font-size="11" font-weight="bold">A/B (twisted pair)</text>
+
+  <!-- 종단저항 표시 -->
+  <g transform="translate(595, 380)">
+    <rect x="0" y="0" width="30" height="12" fill="#666" stroke="#aaa"/>
+    <text x="15" y="9" text-anchor="middle" fill="#fff" font-size="8">120Ω</text>
+  </g>
+  <text x="610" y="404" text-anchor="middle" fill="#aaa" font-size="9">종단</text>
+
+  <g transform="translate(750, 380)">
+    <rect x="0" y="0" width="30" height="12" fill="#666" stroke="#aaa"/>
+    <text x="15" y="9" text-anchor="middle" fill="#fff" font-size="8">120Ω</text>
+  </g>
+  <text x="765" y="404" text-anchor="middle" fill="#aaa" font-size="9">종단</text>
+
+</svg>
+</div>
+
+<!-- 핀 매핑 표 -->
+<div class="pin-table">
+  <h2>📋 Pico W ↔ RS485 #2 (자동방향) ↔ 디스플레이 결선</h2>
+  <table>
+    <thead>
+      <tr><th>구간</th><th>Pico 핀</th><th>RS485 #2 핀</th><th>설명</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="4">Pico ↔ RS485 #2</td><td>3V3 OUT (핀 36)</td><td>VCC</td><td>전원</td></tr>
+      <tr><td>GND (핀 38)</td><td>GND</td><td>공통 접지</td></tr>
+      <tr><td>GP0 (UART0 TX)</td><td>RX</td><td>★ Pico TX → 모듈 RX (교차)</td></tr>
+      <tr><td>GP1 (UART0 RX)</td><td>TX</td><td>★ Pico RX ← 모듈 TX (교차)</td></tr>
+      <tr><td>(미사용)</td><td>GP20</td><td>—</td><td>자동방향 모듈이라 DE/RE 핀 없음. 비워두기.</td></tr>
+      <tr><td rowspan="3">RS485 #2 ↔ 디스플레이</td><td>—</td><td>A</td><td>→ 디스플레이 RS485 A</td></tr>
+      <tr><td>—</td><td>B</td><td>→ 디스플레이 RS485 B</td></tr>
+      <tr><td>—</td><td>—</td><td>GND 공통 (선택, 권장)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 두 옵션 비교 -->
+<div class="compare">
+  <h2>🔀 두 옵션 비교</h2>
+  <table>
+    <thead>
+      <tr><th>항목</th><th>옵션 A: W5500 이더넷 (기본)</th><th>옵션 B: RS485 (대안, 이 페이지)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>추가 부품</td><td>W5500 모듈 ×1 (이미 보유)</td><td>MAX485 모듈 ×1 (~2천원)</td></tr>
+      <tr><td>Pico 핀 점유</td><td>0 추가</td><td>GP0/1 (UART0) + GP20 (DE)</td></tr>
+      <tr><td>디스플레이 측 작업</td><td>W5500 결선 (SPI 5선)</td><td>A/B 2선만 연결</td></tr>
+      <tr><td>거리</td><td>무제한 (LAN)</td><td>1km+ (RS485)</td></tr>
+      <tr><td>프로토콜</td><td>HTTP/JSON (REST)</td><td>텍스트 또는 Modbus</td></tr>
+      <tr><td>회사 DB 통합</td><td>같은 망, 자연 통합 ⭐</td><td>별개 (Pico 거쳐가야)</td></tr>
+      <tr><td>저분 코드 재사용</td><td>X (새로 작성)</td><td>O (RP2350 통신 코드 그대로)</td></tr>
+      <tr><td>전체 구조 단순성</td><td>이더넷 1종류로 통일</td><td>RS485 2개 버스 (센서/디스플레이)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="note">
+  <strong>📌 RS485 옵션 선택 시 진행</strong><br>
+  1. <strong>MAX485 모듈 #2 추가 구매</strong> (양액 시스템 측에 설치)<br>
+  2. <strong>Pico 빵판에 결선</strong>: 위 표대로 GP0/1/20을 MAX485 #2에 연결<br>
+  3. <strong>RP2350 측</strong>: 내장 RS485 단자에 A/B 트위스트페어 연결, MAX485 추가 안 해도 됨<br>
+  4. <strong>종단저항 120Ω</strong>: 버스 양 끝 (Pico측 MAX485 + 디스플레이측)<br>
+  5. <strong>Pico 코드</strong>: <code>display_rs485.py</code> 모듈 추가 (저분 fridge_controller 코드 기반)<br>
+  6. <strong>디스플레이 코드</strong>: 저분의 RP2350 통신부 그대로 가져다 씀 (포맷만 우리 시스템에 맞춰서)<br>
+  <br>
+  <strong>🔁 두 옵션 동시 준비도 가능</strong><br>
+  • 이더넷 방식으로 가다가 문제 생기면 RS485로 폴백 가능 (펌웨어 스위치만으로 전환)<br>
+  • 둘 다 빵판에 결선해두고 코드에서 선택 (다만 Pico 핀 다 점유됨)<br>
+  <br>
+  <strong>⚠ 단점 (RS485 선택 시)</strong><br>
+  • <strong>회사 DB 적재가 디스플레이에 의존</strong>하지 않음 → 큰 단점 아님 (Pico가 직접 DB POST)<br>
+  • <strong>디스플레이가 회사망 분리</strong> → 원격에서 모니터링 못 함 (필요하면 Pico 거쳐서)<br>
+  • <strong>프로토콜 수동 정의</strong>: 텍스트 포맷 vs JSON-over-RS485 vs Modbus 결정 필요
+</div>
+
+</body>
+</html>

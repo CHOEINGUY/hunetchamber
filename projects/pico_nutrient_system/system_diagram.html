@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>양액 자동조제·점적관수 시스템 (두 옵션 + 배수)</title>
+<style>
+  body {
+    font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+    margin: 0; padding: 24px; color: #0f172a;
+    min-height: 100vh;
+  }
+  h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.3px; }
+  .sub { color: #64748b; font-size: 14px; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 320px; gap: 18px; }
+  @media (max-width: 1500px) { .grid { grid-template-columns: 1fr 1fr; } .side { grid-column: 1 / -1; } }
+  .panel {
+    background: #fff; border-radius: 16px; padding: 14px;
+    box-shadow: 0 4px 16px rgba(15,23,42,0.08);
+  }
+  .panel.tag-a { border-top: 4px solid #2563eb; }
+  .panel.tag-b { border-top: 4px solid #db2777; }
+  .panel-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .panel-sub { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+  .badge { display:inline-block; padding: 2px 8px; border-radius: 10px; font-size:11px; font-weight:700; color:#fff; margin-right:6px; }
+  .badge.a { background:#2563eb; }
+  .badge.b { background:#db2777; }
+  .side h3 {
+    font-size: 14px; margin: 0 0 8px; color: #0f172a;
+    padding-bottom: 6px; border-bottom: 2px solid #e2e8f0;
+  }
+  .side h3:not(:first-child) { margin-top: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 10px; font-size: 12px; padding: 2px 0; }
+  .swatch { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+  table { font-size: 12px; border-collapse: collapse; width: 100%; }
+  th, td { padding: 5px 6px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+  th { background: #f8fafc; font-weight: 600; }
+  td.a-col { color: #1d4ed8; font-weight: 600; }
+  td.b-col { color: #be185d; font-weight: 600; }
+  .note { background: #fef3c7; border-left: 3px solid #f59e0b; padding: 8px 10px; font-size: 12px; border-radius: 4px; margin-top: 8px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h1>🌱 양액 자동조제·점적관수 시스템 — 두 옵션 + 배수 라인</h1>
+<div class="sub">하단 펌프·수조·회수통 공통. 위쪽 식재 방식만 두 가지로 검토 중.</div>
+
+<div class="grid">
+
+<!-- ========== 옵션 A ========== -->
+<div class="panel tag-a">
+  <div class="panel-title"><span class="badge a">옵션 A</span> 작은 화분 ×8 (1주/화분)</div>
+  <div class="panel-sub">화분당 식물 1주 · 점적노즐 2L/h ×8 · 1회 1.6L · 점적 ~6분</div>
+
+  <svg width="100%" viewBox="0 0 480 820" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="frameA" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#475569"/><stop offset="50%" stop-color="#64748b"/><stop offset="100%" stop-color="#475569"/>
+      </linearGradient>
+      <linearGradient id="potA" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#c2410c"/><stop offset="100%" stop-color="#7c2d12"/>
+      </linearGradient>
+      <radialGradient id="leafA" cx="0.3" cy="0.3" r="0.7">
+        <stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#15803d"/>
+      </radialGradient>
+      <linearGradient id="waterA" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#0284c7"/>
+      </linearGradient>
+      <linearGradient id="yaA"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#b45309"/></linearGradient>
+      <linearGradient id="ybA"><stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#9a3412"/></linearGradient>
+      <linearGradient id="mixA" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#15803d"/></linearGradient>
+      <linearGradient id="ctrlA" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+      <linearGradient id="drainA" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6d28d9"/>
+      </linearGradient>
+      <filter id="shA" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dx="0" dy="2"/>
+        <feComponentTransfer><feFuncA type="linear" slope="0.25"/></feComponentTransfer>
+        <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- 프레임 -->
+    <rect x="20" y="20" width="12" height="760" fill="url(#frameA)" rx="2"/>
+    <rect x="448" y="20" width="12" height="760" fill="url(#frameA)" rx="2"/>
+    <rect x="12" y="780" width="28" height="20" fill="#334155" rx="3"/>
+    <rect x="440" y="780" width="28" height="20" fill="#334155" rx="3"/>
+    <rect x="20" y="20" width="440" height="8" fill="#334155" rx="2"/>
+    <rect x="20" y="255" width="440" height="8" fill="#334155" rx="2"/>
+    <rect x="20" y="495" width="440" height="8" fill="#334155" rx="2"/>
+    <rect x="20" y="775" width="440" height="8" fill="#334155" rx="2"/>
+
+    <rect x="38" y="38" width="70" height="20" rx="10" fill="#1e293b"/>
+    <text x="73" y="52" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">2층 상단</text>
+    <rect x="38" y="273" width="70" height="20" rx="10" fill="#1e293b"/>
+    <text x="73" y="287" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">1층 중단</text>
+    <rect x="38" y="513" width="80" height="20" rx="10" fill="#dc2626"/>
+    <text x="78" y="527" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">장치 칸</text>
+
+    <!-- 메인호스 (관수) -->
+    <line x1="430" y1="660" x2="430" y2="90" stroke="#0284c7" stroke-width="5" stroke-linecap="round"/>
+    <line x1="430" y1="100" x2="100" y2="100" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+    <line x1="430" y1="335" x2="100" y2="335" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- 배수 호스 (보라색, 다단 왼쪽 기둥 따라 아래로) -->
+    <line x1="50" y1="230" x2="50" y2="700" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+    <line x1="50" y1="230" x2="100" y2="230" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+    <line x1="50" y1="460" x2="100" y2="460" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+
+    <!-- 2층 화분 4개 + 받침접시 -->
+    <g>
+      <g transform="translate(80, 80)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+      <g transform="translate(170, 80)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+      <g transform="translate(260, 80)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+      <g transform="translate(350, 80)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+
+      <!-- 노즐 4개 (2층) -->
+      <g>
+        <line x1="115" y1="100" x2="115" y2="188" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="115" cy="100" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="115" cy="195" rx="2" ry="3" fill="#38bdf8"/>
+        <line x1="205" y1="100" x2="205" y2="188" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="205" cy="100" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="205" cy="195" rx="2" ry="3" fill="#38bdf8"/>
+        <line x1="295" y1="100" x2="295" y2="188" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="295" cy="100" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="295" cy="195" rx="2" ry="3" fill="#38bdf8"/>
+        <line x1="385" y1="100" x2="385" y2="188" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="385" cy="100" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="385" cy="195" rx="2" ry="3" fill="#38bdf8"/>
+      </g>
+
+      <!-- 2층 배수 트레이 (모든 화분 아래 통합) -->
+      <rect x="80" y="232" width="340" height="6" fill="url(#drainA)" rx="2"/>
+      <text x="425" y="237" font-size="9" fill="#6d28d9" font-weight="600">배수트레이 →</text>
+    </g>
+
+    <!-- 1층 화분 4개 -->
+    <g>
+      <g transform="translate(80, 315)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+      <g transform="translate(170, 315)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+      <g transform="translate(260, 315)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+      <g transform="translate(350, 315)" filter="url(#shA)">
+        <ellipse cx="35" cy="70" rx="18" ry="12" fill="url(#leafA)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="48" cy="78" rx="14" ry="9" fill="url(#leafA)" opacity="0.85"/>
+        <ellipse cx="35" cy="55" rx="11" ry="7" fill="url(#leafA)"/>
+        <line x1="35" y1="88" x2="35" y2="110" stroke="#15803d" stroke-width="2.5"/>
+        <path d="M 18 110 L 52 110 L 56 155 L 14 155 Z" fill="url(#potA)"/>
+        <ellipse cx="35" cy="110" rx="17" ry="4" fill="#451a03"/>
+      </g>
+
+      <g>
+        <line x1="115" y1="335" x2="115" y2="423" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="115" cy="335" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="115" cy="430" rx="2" ry="3" fill="#38bdf8"/>
+        <line x1="205" y1="335" x2="205" y2="423" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="205" cy="335" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="205" cy="430" rx="2" ry="3" fill="#38bdf8"/>
+        <line x1="295" y1="335" x2="295" y2="423" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="295" cy="335" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="295" cy="430" rx="2" ry="3" fill="#38bdf8"/>
+        <line x1="385" y1="335" x2="385" y2="423" stroke="#0ea5e9" stroke-width="2"/>
+        <circle cx="385" cy="335" r="4" fill="#0c4a6e" stroke="#fff" stroke-width="1"/>
+        <ellipse cx="385" cy="430" rx="2" ry="3" fill="#38bdf8"/>
+      </g>
+
+      <!-- 1층 배수 트레이 -->
+      <rect x="80" y="462" width="340" height="6" fill="url(#drainA)" rx="2"/>
+    </g>
+
+    <!-- 맨 아래 칸 -->
+    <rect x="40" y="550" width="400" height="215" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3" rx="6"/>
+    <g filter="url(#shA)">
+      <rect x="50" y="565" width="72" height="160" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+      <rect x="55" y="605" width="62" height="115" rx="3" fill="url(#waterA)" opacity="0.85"/>
+      <path d="M 55 605 Q 70 600 86 605 T 117 605" stroke="#7dd3fc" stroke-width="2" fill="none"/>
+      <text x="86" y="582" text-anchor="middle" font-size="10" font-weight="700" fill="#0c4a6e">원수</text>
+      <text x="86" y="596" text-anchor="middle" font-size="9" fill="#0c4a6e">20L</text>
+    </g>
+    <g filter="url(#shA)">
+      <rect x="135" y="615" width="42" height="110" rx="5" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+      <rect x="138" y="640" width="36" height="82" rx="2" fill="url(#yaA)" opacity="0.9"/>
+      <text x="156" y="635" text-anchor="middle" font-size="10" font-weight="700" fill="#78350f">A 1L</text>
+    </g>
+    <g filter="url(#shA)">
+      <rect x="190" y="615" width="42" height="110" rx="5" fill="#ffedd5" stroke="#9a3412" stroke-width="2"/>
+      <rect x="193" y="640" width="36" height="82" rx="2" fill="url(#ybA)" opacity="0.9"/>
+      <text x="211" y="635" text-anchor="middle" font-size="10" font-weight="700" fill="#7c2d12">B 1L</text>
+    </g>
+    <g filter="url(#shA)">
+      <rect x="245" y="565" width="90" height="160" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+      <rect x="250" y="610" width="80" height="110" rx="3" fill="url(#mixA)" opacity="0.85"/>
+      <path d="M 250 610 Q 270 605 290 610 T 330 610" stroke="#86efac" stroke-width="2" fill="none"/>
+      <text x="290" y="583" text-anchor="middle" font-size="10" font-weight="700" fill="#14532d">혼합조</text>
+      <text x="290" y="596" text-anchor="middle" font-size="9" fill="#14532d">5L</text>
+      <g transform="translate(290, 690)">
+        <circle r="9" fill="none" stroke="#fff" stroke-width="2"/>
+        <line x1="-6" y1="0" x2="6" y2="0" stroke="#fff" stroke-width="2"/>
+      </g>
+    </g>
+
+    <!-- 회수통 (배수 도착점) -->
+    <g filter="url(#shA)">
+      <rect x="345" y="600" width="45" height="125" rx="5" fill="#ede9fe" stroke="#6d28d9" stroke-width="2"/>
+      <rect x="348" y="660" width="39" height="62" rx="2" fill="url(#drainA)" opacity="0.7"/>
+      <text x="367" y="618" text-anchor="middle" font-size="9" font-weight="700" fill="#5b21b6">회수</text>
+      <text x="367" y="630" text-anchor="middle" font-size="9" fill="#5b21b6">통</text>
+      <text x="367" y="645" text-anchor="middle" font-size="8" fill="#5b21b6">5L</text>
+    </g>
+    <!-- 배수호스 → 회수통 -->
+    <line x1="50" y1="700" x2="345" y2="700" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+    <polygon points="345,700 340,694 340,706" fill="#a78bfa"/>
+
+    <!-- Pico -->
+    <g filter="url(#shA)">
+      <rect x="395" y="565" width="38" height="160" rx="6" fill="url(#ctrlA)"/>
+      <text x="414" y="582" text-anchor="middle" font-size="8" fill="#fbbf24" font-weight="700">Pico W</text>
+      <rect x="398" y="590" width="32" height="13" rx="2" fill="#0c4a6e"/>
+      <text x="414" y="600" text-anchor="middle" font-size="7" fill="#e2e8f0">CH1</text>
+      <rect x="398" y="606" width="32" height="13" rx="2" fill="#7c2d12"/>
+      <text x="414" y="616" text-anchor="middle" font-size="7" fill="#e2e8f0">CH2</text>
+      <rect x="398" y="622" width="32" height="13" rx="2" fill="#7c2d12"/>
+      <text x="414" y="632" text-anchor="middle" font-size="7" fill="#e2e8f0">CH3</text>
+      <rect x="398" y="638" width="32" height="13" rx="2" fill="#7f1d1d"/>
+      <text x="414" y="648" text-anchor="middle" font-size="7" fill="#e2e8f0">CH4</text>
+    </g>
+    <path d="M 433 638 Q 450 615 440 660" stroke="#0284c7" stroke-width="5" fill="none"/>
+    <polygon points="430,660 425,672 440,670" fill="#0284c7"/>
+  </svg>
+
+  <div class="note">📌 회수통은 양액 농도가 변해 <b>재사용 X</b>. 가득 차면 폐기. 배수량은 1회 200~300ml 정도라 5L면 약 한 달치.</div>
+</div>
+
+<!-- ========== 옵션 B (조정 버전) ========== -->
+<div class="panel tag-b">
+  <div class="panel-title"><span class="badge b">옵션 B</span> 큰 화분 ×2 (다주/화분) — 조정</div>
+  <div class="panel-sub">화분당 3주 · 지름 25cm 장방형 · 점적노즐 4L/h ×4 · 1회 2L · 점적 ~7.5분</div>
+
+  <svg width="100%" viewBox="0 0 480 820" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="frameB" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#475569"/><stop offset="50%" stop-color="#64748b"/><stop offset="100%" stop-color="#475569"/>
+      </linearGradient>
+      <linearGradient id="potB" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#c2410c"/><stop offset="100%" stop-color="#7c2d12"/>
+      </linearGradient>
+      <radialGradient id="leafB" cx="0.3" cy="0.3" r="0.7">
+        <stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#15803d"/>
+      </radialGradient>
+      <linearGradient id="waterB" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#0284c7"/>
+      </linearGradient>
+      <linearGradient id="yaB"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#b45309"/></linearGradient>
+      <linearGradient id="ybB"><stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#9a3412"/></linearGradient>
+      <linearGradient id="mixB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#15803d"/></linearGradient>
+      <linearGradient id="ctrlB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+      <linearGradient id="drainB" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6d28d9"/>
+      </linearGradient>
+      <filter id="shB" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dx="0" dy="2"/>
+        <feComponentTransfer><feFuncA type="linear" slope="0.25"/></feComponentTransfer>
+        <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- 프레임 -->
+    <rect x="20" y="20" width="12" height="760" fill="url(#frameB)" rx="2"/>
+    <rect x="448" y="20" width="12" height="760" fill="url(#frameB)" rx="2"/>
+    <rect x="12" y="780" width="28" height="20" fill="#334155" rx="3"/>
+    <rect x="440" y="780" width="28" height="20" fill="#334155" rx="3"/>
+    <rect x="20" y="20" width="440" height="8" fill="#334155" rx="2"/>
+    <rect x="20" y="255" width="440" height="8" fill="#334155" rx="2"/>
+    <rect x="20" y="495" width="440" height="8" fill="#334155" rx="2"/>
+    <rect x="20" y="775" width="440" height="8" fill="#334155" rx="2"/>
+
+    <rect x="38" y="38" width="70" height="20" rx="10" fill="#1e293b"/>
+    <text x="73" y="52" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">2층 상단</text>
+    <rect x="38" y="273" width="70" height="20" rx="10" fill="#1e293b"/>
+    <text x="73" y="287" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">1층 중단</text>
+    <rect x="38" y="513" width="80" height="20" rx="10" fill="#dc2626"/>
+    <text x="78" y="527" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">장치 칸</text>
+
+    <!-- 메인호스 -->
+    <line x1="430" y1="660" x2="430" y2="90" stroke="#0284c7" stroke-width="5" stroke-linecap="round"/>
+    <line x1="430" y1="100" x2="155" y2="100" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+    <line x1="430" y1="335" x2="155" y2="335" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- 배수 호스 (옵션 A와 같은 구조) -->
+    <line x1="50" y1="230" x2="50" y2="700" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+    <line x1="50" y1="230" x2="100" y2="230" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+    <line x1="50" y1="460" x2="100" y2="460" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+
+    <!-- 2층 큰 화분 (식물 3그루) -->
+    <g transform="translate(115, 80)" filter="url(#shB)">
+      <g transform="translate(45, 5)">
+        <ellipse cx="0" cy="65" rx="18" ry="12" fill="url(#leafB)"/>
+        <ellipse cx="-13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="0" cy="52" rx="11" ry="7" fill="url(#leafB)"/>
+        <line x1="0" y1="82" x2="0" y2="108" stroke="#15803d" stroke-width="2.5"/>
+      </g>
+      <g transform="translate(125, 0)">
+        <ellipse cx="0" cy="70" rx="20" ry="13" fill="url(#leafB)"/>
+        <ellipse cx="-14" cy="80" rx="16" ry="10" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="14" cy="80" rx="16" ry="10" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="0" cy="55" rx="12" ry="8" fill="url(#leafB)"/>
+        <line x1="0" y1="88" x2="0" y2="113" stroke="#15803d" stroke-width="2.5"/>
+      </g>
+      <g transform="translate(205, 5)">
+        <ellipse cx="0" cy="65" rx="18" ry="12" fill="url(#leafB)"/>
+        <ellipse cx="-13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="0" cy="52" rx="11" ry="7" fill="url(#leafB)"/>
+        <line x1="0" y1="82" x2="0" y2="108" stroke="#15803d" stroke-width="2.5"/>
+      </g>
+      <!-- 화분 (장방형) - 지름 25cm 가정, 위쪽 narrow than option B initial -->
+      <path d="M 18 113 L 232 113 L 240 158 L 10 158 Z" fill="url(#potB)"/>
+      <ellipse cx="125" cy="113" rx="107" ry="7" fill="#451a03"/>
+      <ellipse cx="125" cy="113" rx="103" ry="4" fill="#78350f"/>
+    </g>
+
+    <!-- 2층 노즐 (화분 양쪽 + 가운데 2개) -->
+    <g>
+      <line x1="155" y1="100" x2="155" y2="188" stroke="#0ea5e9" stroke-width="2"/>
+      <circle cx="155" cy="100" r="5" fill="#0c4a6e" stroke="#fff" stroke-width="1.2"/>
+      <ellipse cx="155" cy="195" rx="2" ry="3" fill="#38bdf8"/>
+      <line x1="305" y1="100" x2="305" y2="188" stroke="#0ea5e9" stroke-width="2"/>
+      <circle cx="305" cy="100" r="5" fill="#0c4a6e" stroke="#fff" stroke-width="1.2"/>
+      <ellipse cx="305" cy="195" rx="2" ry="3" fill="#38bdf8"/>
+    </g>
+
+    <!-- 2층 배수 트레이 -->
+    <rect x="100" y="232" width="320" height="6" fill="url(#drainB)" rx="2"/>
+    <text x="425" y="237" font-size="9" fill="#6d28d9" font-weight="600">배수트레이 →</text>
+
+    <!-- 1층 큰 화분 -->
+    <g transform="translate(115, 315)" filter="url(#shB)">
+      <g transform="translate(45, 5)">
+        <ellipse cx="0" cy="65" rx="18" ry="12" fill="url(#leafB)"/>
+        <ellipse cx="-13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="0" cy="52" rx="11" ry="7" fill="url(#leafB)"/>
+        <line x1="0" y1="82" x2="0" y2="108" stroke="#15803d" stroke-width="2.5"/>
+      </g>
+      <g transform="translate(125, 0)">
+        <ellipse cx="0" cy="70" rx="20" ry="13" fill="url(#leafB)"/>
+        <ellipse cx="-14" cy="80" rx="16" ry="10" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="14" cy="80" rx="16" ry="10" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="0" cy="55" rx="12" ry="8" fill="url(#leafB)"/>
+        <line x1="0" y1="88" x2="0" y2="113" stroke="#15803d" stroke-width="2.5"/>
+      </g>
+      <g transform="translate(205, 5)">
+        <ellipse cx="0" cy="65" rx="18" ry="12" fill="url(#leafB)"/>
+        <ellipse cx="-13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="13" cy="74" rx="14" ry="9" fill="url(#leafB)" opacity="0.85"/>
+        <ellipse cx="0" cy="52" rx="11" ry="7" fill="url(#leafB)"/>
+        <line x1="0" y1="82" x2="0" y2="108" stroke="#15803d" stroke-width="2.5"/>
+      </g>
+      <path d="M 18 113 L 232 113 L 240 158 L 10 158 Z" fill="url(#potB)"/>
+      <ellipse cx="125" cy="113" rx="107" ry="7" fill="#451a03"/>
+      <ellipse cx="125" cy="113" rx="103" ry="4" fill="#78350f"/>
+    </g>
+
+    <!-- 1층 노즐 -->
+    <g>
+      <line x1="155" y1="335" x2="155" y2="423" stroke="#0ea5e9" stroke-width="2"/>
+      <circle cx="155" cy="335" r="5" fill="#0c4a6e" stroke="#fff" stroke-width="1.2"/>
+      <ellipse cx="155" cy="430" rx="2" ry="3" fill="#38bdf8"/>
+      <line x1="305" y1="335" x2="305" y2="423" stroke="#0ea5e9" stroke-width="2"/>
+      <circle cx="305" cy="335" r="5" fill="#0c4a6e" stroke="#fff" stroke-width="1.2"/>
+      <ellipse cx="305" cy="430" rx="2" ry="3" fill="#38bdf8"/>
+    </g>
+
+    <!-- 1층 배수 트레이 -->
+    <rect x="100" y="462" width="320" height="6" fill="url(#drainB)" rx="2"/>
+
+    <!-- 맨 아래 칸 (옵션 A와 동일) -->
+    <rect x="40" y="550" width="400" height="215" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3" rx="6"/>
+    <g filter="url(#shB)">
+      <rect x="50" y="565" width="72" height="160" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+      <rect x="55" y="605" width="62" height="115" rx="3" fill="url(#waterB)" opacity="0.85"/>
+      <path d="M 55 605 Q 70 600 86 605 T 117 605" stroke="#7dd3fc" stroke-width="2" fill="none"/>
+      <text x="86" y="582" text-anchor="middle" font-size="10" font-weight="700" fill="#0c4a6e">원수</text>
+      <text x="86" y="596" text-anchor="middle" font-size="9" fill="#0c4a6e">20L</text>
+    </g>
+    <g filter="url(#shB)">
+      <rect x="135" y="615" width="42" height="110" rx="5" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+      <rect x="138" y="640" width="36" height="82" rx="2" fill="url(#yaB)" opacity="0.9"/>
+      <text x="156" y="635" text-anchor="middle" font-size="10" font-weight="700" fill="#78350f">A 1L</text>
+    </g>
+    <g filter="url(#shB)">
+      <rect x="190" y="615" width="42" height="110" rx="5" fill="#ffedd5" stroke="#9a3412" stroke-width="2"/>
+      <rect x="193" y="640" width="36" height="82" rx="2" fill="url(#ybB)" opacity="0.9"/>
+      <text x="211" y="635" text-anchor="middle" font-size="10" font-weight="700" fill="#7c2d12">B 1L</text>
+    </g>
+    <g filter="url(#shB)">
+      <rect x="245" y="565" width="90" height="160" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+      <rect x="250" y="610" width="80" height="110" rx="3" fill="url(#mixB)" opacity="0.85"/>
+      <path d="M 250 610 Q 270 605 290 610 T 330 610" stroke="#86efac" stroke-width="2" fill="none"/>
+      <text x="290" y="583" text-anchor="middle" font-size="10" font-weight="700" fill="#14532d">혼합조</text>
+      <text x="290" y="596" text-anchor="middle" font-size="9" fill="#14532d">5L</text>
+      <g transform="translate(290, 690)">
+        <circle r="9" fill="none" stroke="#fff" stroke-width="2"/>
+        <line x1="-6" y1="0" x2="6" y2="0" stroke="#fff" stroke-width="2"/>
+      </g>
+    </g>
+    <g filter="url(#shB)">
+      <rect x="345" y="600" width="45" height="125" rx="5" fill="#ede9fe" stroke="#6d28d9" stroke-width="2"/>
+      <rect x="348" y="660" width="39" height="62" rx="2" fill="url(#drainB)" opacity="0.7"/>
+      <text x="367" y="618" text-anchor="middle" font-size="9" font-weight="700" fill="#5b21b6">회수</text>
+      <text x="367" y="630" text-anchor="middle" font-size="9" fill="#5b21b6">통</text>
+      <text x="367" y="645" text-anchor="middle" font-size="8" fill="#5b21b6">5L</text>
+    </g>
+    <line x1="50" y1="700" x2="345" y2="700" stroke="#a78bfa" stroke-width="3" stroke-dasharray="5,2"/>
+    <polygon points="345,700 340,694 340,706" fill="#a78bfa"/>
+    <g filter="url(#shB)">
+      <rect x="395" y="565" width="38" height="160" rx="6" fill="url(#ctrlB)"/>
+      <text x="414" y="582" text-anchor="middle" font-size="8" fill="#fbbf24" font-weight="700">Pico W</text>
+      <rect x="398" y="590" width="32" height="13" rx="2" fill="#0c4a6e"/>
+      <text x="414" y="600" text-anchor="middle" font-size="7" fill="#e2e8f0">CH1</text>
+      <rect x="398" y="606" width="32" height="13" rx="2" fill="#7c2d12"/>
+      <text x="414" y="616" text-anchor="middle" font-size="7" fill="#e2e8f0">CH2</text>
+      <rect x="398" y="622" width="32" height="13" rx="2" fill="#7c2d12"/>
+      <text x="414" y="632" text-anchor="middle" font-size="7" fill="#e2e8f0">CH3</text>
+      <rect x="398" y="638" width="32" height="13" rx="2" fill="#7f1d1d"/>
+      <text x="414" y="648" text-anchor="middle" font-size="7" fill="#e2e8f0">CH4</text>
+    </g>
+    <path d="M 433 638 Q 450 615 440 660" stroke="#0284c7" stroke-width="5" fill="none"/>
+    <polygon points="430,660 425,672 440,670" fill="#0284c7"/>
+  </svg>
+
+  <div class="note">📌 배수트레이 = 화분 받침접시 한 줄로 통합. 흘러나온 양액이 한쪽으로 모여 배수호스 → 회수통.</div>
+</div>
+
+<!-- 사이드 패널 -->
+<div class="panel side">
+  <h3>⚖️ 옵션 비교</h3>
+  <table>
+    <thead><tr><th>항목</th><th class="a-col">A 작은화분×8</th><th class="b-col">B 큰화분×2</th></tr></thead>
+    <tbody>
+      <tr><td>화분 수</td><td class="a-col">8개</td><td class="b-col">2개</td></tr>
+      <tr><td>화분당 식물</td><td class="a-col">1주</td><td class="b-col">3주</td></tr>
+      <tr><td>총 식물</td><td class="a-col">8주</td><td class="b-col">6주</td></tr>
+      <tr><td>점적노즐</td><td class="a-col">2L/h ×8</td><td class="b-col">4L/h ×4</td></tr>
+      <tr><td>1회 공급량</td><td class="a-col">1.6L</td><td class="b-col">2L</td></tr>
+      <tr><td>점적관수 시간</td><td class="a-col">~6분</td><td class="b-col">~7.5분</td></tr>
+      <tr><td>혼합조 5L</td><td class="a-col">여유</td><td class="b-col">여유</td></tr>
+      <tr><td>부품 가짓수</td><td class="a-col">많음</td><td class="b-col">절반</td></tr>
+      <tr><td>호스 분기</td><td class="a-col">8분기</td><td class="b-col">4분기</td></tr>
+      <tr><td>개체 분리</td><td class="a-col">✓</td><td class="b-col">✗ (군식)</td></tr>
+      <tr><td>흙 완충</td><td class="a-col">빨리 마름</td><td class="b-col">길게 유지</td></tr>
+    </tbody>
+  </table>
+
+  <h3>💧 배수 시스템 (공통)</h3>
+  <table>
+    <tr><th>요소</th><td>층별 배수 트레이 + 배수호스 → 회수통 5L</td></tr>
+    <tr><th>배수량</th><td>1회 ~200~300ml (양액의 10~15%)</td></tr>
+    <tr><th>회수통</th><td>약 한 달분, 차면 폐기 (재사용 X)</td></tr>
+    <tr><th>발전</th><td>회수통에 수위센서 → 알림</td></tr>
+  </table>
+
+  <h3>🏷️ 색깔 범례</h3>
+  <div class="legend-item"><span class="swatch" style="background:#0ea5e9"></span> 메인호스 (관수, 양액→화분)</div>
+  <div class="legend-item"><span class="swatch" style="background:#a78bfa"></span> 배수호스 (회수)</div>
+  <div class="legend-item"><span class="swatch" style="background:linear-gradient(180deg,#7dd3fc,#0284c7)"></span> 원수통 20L</div>
+  <div class="legend-item"><span class="swatch" style="background:linear-gradient(180deg,#86efac,#15803d)"></span> 혼합조 5L</div>
+  <div class="legend-item"><span class="swatch" style="background:linear-gradient(180deg,#a78bfa,#6d28d9)"></span> 회수통 5L</div>
+  <div class="legend-item"><span class="swatch" style="background:#0c4a6e"></span> PC 점적노즐</div>
+
+  <h3>💭 권장</h3>
+  <div style="font-size:12px; color:#475569; line-height:1.7;">
+    <b style="color:#be185d;">옵션 B (조정)가 균형 좋음:</b><br>
+    같은 종 군식이 목적이고, 분기 절반·부품 적음·시간 비슷·혼합조 여유까지 OK. 흙 완충 효과로 관수 주기도 길어짐.<br><br>
+    <b>다만 주의:</b> 군식이라 한 화분 식물이 병들면 다른 식물에 전염 가능 — 사후 모니터링 중요.
+  </div>
+</div>
+
+</div>
+</body>
+</html>

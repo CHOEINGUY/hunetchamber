@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>시스템 네트워크 토폴로지</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { color: #89b4fa; margin: 0 0 4px; }
+  .subtitle { color: #94a3b8; margin-bottom: 24px; font-size: 14px; }
+  .container { background: #1e293b; padding: 20px; border-radius: 12px; }
+  svg { display: block; }
+  .legend {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 1100px;
+    width: 100%;
+  }
+  .legend-item {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #1e293b;
+    border-left: 4px solid;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .legend-item h3 { margin: 0 0 6px; font-size: 14px; }
+  .legend-item p { margin: 0; color: #94a3b8; font-size: 12px; }
+  .pico   { border-left-color: #a6e3a1; }
+  .pico h3   { color: #a6e3a1; }
+  .display{ border-left-color: #f9e2af; }
+  .display h3{ color: #f9e2af; }
+  .db     { border-left-color: #cba6f7; }
+  .db h3     { color: #cba6f7; }
+  .note {
+    margin-top: 20px;
+    max-width: 1100px;
+    padding: 14px 18px;
+    background: #1e293b;
+    border-radius: 8px;
+    border-left: 4px solid #fab387;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .note strong { color: #fab387; }
+</style>
+</head>
+<body>
+
+<h1>🌐 시스템 네트워크 토폴로지</h1>
+<div class="subtitle">W5500 이더넷 × 2개로 Pico W (양액 시스템) ↔ RP2350 (디스플레이) ↔ 회사 DB 연결</div>
+
+<div class="container">
+<svg width="1100" height="650" viewBox="0 0 1100 650">
+
+  <!-- ===== 회사망 스위치 (가운데 상단) ===== -->
+  <g transform="translate(440, 30)">
+    <rect x="0" y="0" width="220" height="80" rx="8" fill="#1e3a5f" stroke="#89b4fa" stroke-width="2"/>
+    <text x="110" y="25" text-anchor="middle" fill="#89b4fa" font-size="14" font-weight="bold">회사망 스위치</text>
+    <text x="110" y="42" text-anchor="middle" fill="#aaa" font-size="11">192.168.0.0/24</text>
+    <!-- RJ45 포트들 -->
+    <g fill="#374151" stroke="#9ca3af">
+      <rect x="20"  y="55" width="20" height="15"/>
+      <rect x="60"  y="55" width="20" height="15"/>
+      <rect x="100" y="55" width="20" height="15"/>
+      <rect x="140" y="55" width="20" height="15"/>
+      <rect x="180" y="55" width="20" height="15"/>
+    </g>
+  </g>
+
+  <!-- ===== 왼쪽 노드: Pico W + 양액 시스템 ===== -->
+  <g transform="translate(60, 200)">
+    <rect x="0" y="0" width="320" height="350" rx="12" fill="#1e3a2a" stroke="#a6e3a1" stroke-width="2"/>
+    <text x="160" y="24" text-anchor="middle" fill="#a6e3a1" font-size="15" font-weight="bold">🌱 양액 시스템 (Pico W)</text>
+    <text x="160" y="42" text-anchor="middle" fill="#aaa" font-size="11">192.168.0.X (DHCP)</text>
+
+    <!-- W5500 -->
+    <rect x="20" y="55" width="80" height="40" rx="4" fill="#1e3a5f" stroke="#89b4fa"/>
+    <text x="60" y="72" text-anchor="middle" fill="#89b4fa" font-size="11" font-weight="bold">W5500</text>
+    <text x="60" y="88" text-anchor="middle" fill="#aaa" font-size="9">SPI0</text>
+
+    <!-- Pico W -->
+    <rect x="120" y="55" width="180" height="40" rx="4" fill="#2d4a2d" stroke="#a6e3a1"/>
+    <text x="210" y="72" text-anchor="middle" fill="#a6e3a1" font-size="13" font-weight="bold">Pico W</text>
+    <text x="210" y="88" text-anchor="middle" fill="#aaa" font-size="9">MicroPython · main.py</text>
+
+    <!-- 연결 라인 -->
+    <line x1="100" y1="75" x2="120" y2="75" stroke="#89b4fa" stroke-width="2"/>
+
+    <!-- 역할 박스들 -->
+    <g font-size="11" fill="#e2e8f0">
+      <rect x="20" y="115" width="280" height="40" rx="4" fill="#0f172a" stroke="#475569"/>
+      <text x="30" y="132" fill="#fab387" font-weight="bold">🔁 자동 시퀀스</text>
+      <text x="30" y="148" fill="#94a3b8" font-size="10">센서값 기반 의사결정 → 펌프/교반/관수</text>
+
+      <rect x="20" y="165" width="280" height="40" rx="4" fill="#0f172a" stroke="#475569"/>
+      <text x="30" y="182" fill="#a6e3a1" font-weight="bold">📡 센서 폴링 (RS485 UART1)</text>
+      <text x="30" y="198" fill="#94a3b8" font-size="10">온습도/토양수분/EC → 5초 주기</text>
+
+      <rect x="20" y="215" width="280" height="40" rx="4" fill="#0f172a" stroke="#475569"/>
+      <text x="30" y="232" fill="#f5c2e7" font-weight="bold">⚙ 액추에이터</text>
+      <text x="30" y="248" fill="#94a3b8" font-size="10">펌프 4ch + 교반기 + LED + 팬</text>
+
+      <rect x="20" y="265" width="280" height="40" rx="4" fill="#0f172a" stroke="#475569"/>
+      <text x="30" y="282" fill="#89b4fa" font-weight="bold">🌐 HTTP 서버 (포트 80)</text>
+      <text x="30" y="298" fill="#94a3b8" font-size="10">웹UI + JSON API (/api/status 등)</text>
+
+      <rect x="20" y="315" width="280" height="25" rx="4" fill="#0f172a" stroke="#475569"/>
+      <text x="30" y="332" fill="#cba6f7" font-size="10">→ 회사 DB POST (센서/이벤트)</text>
+    </g>
+  </g>
+
+  <!-- ===== 오른쪽 노드: RP2350 디스플레이 ===== -->
+  <g transform="translate(720, 200)">
+    <rect x="0" y="0" width="320" height="350" rx="12" fill="#3a3a1e" stroke="#f9e2af" stroke-width="2"/>
+    <text x="160" y="24" text-anchor="middle" fill="#f9e2af" font-size="15" font-weight="bold">🖥 디스플레이 (RP2350)</text>
+    <text x="160" y="42" text-anchor="middle" fill="#aaa" font-size="11">192.168.0.Y (DHCP)</text>
+
+    <!-- W5500 -->
+    <rect x="20" y="55" width="80" height="40" rx="4" fill="#1e3a5f" stroke="#89b4fa"/>
+    <text x="60" y="72" text-anchor="middle" fill="#89b4fa" font-size="11" font-weight="bold">W5500</text>
+    <text x="60" y="88" text-anchor="middle" fill="#aaa" font-size="9">SPI0 (외부)</text>
+
+    <!-- RP2350 + LCD -->
+    <rect x="120" y="55" width="180" height="40" rx="4" fill="#5a4520" stroke="#f9e2af"/>
+    <text x="210" y="72" text-anchor="middle" fill="#f9e2af" font-size="13" font-weight="bold">RP2350</text>
+    <text x="210" y="88" text-anchor="middle" fill="#aaa" font-size="9">Waveshare Touch-LCD-4</text>
+
+    <line x1="100" y1="75" x2="120" y2="75" stroke="#89b4fa" stroke-width="2"/>
+
+    <!-- LCD 화면 미리보기 -->
+    <rect x="20" y="115" width="280" height="180" rx="6" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+    <text x="160" y="135" text-anchor="middle" fill="#f9e2af" font-size="12" font-weight="bold">4" 480×480 IPS LCD</text>
+
+    <g font-size="11">
+      <rect x="30" y="148" width="120" height="40" rx="4" fill="#1e3a2a"/>
+      <text x="90" y="163" text-anchor="middle" fill="#a6e3a1">EC: 1.20</text>
+      <text x="90" y="180" text-anchor="middle" fill="#94a3b8" font-size="9">mS/cm</text>
+
+      <rect x="160" y="148" width="120" height="40" rx="4" fill="#1e3a2a"/>
+      <text x="220" y="163" text-anchor="middle" fill="#a6e3a1">습도: 65%</text>
+      <text x="220" y="180" text-anchor="middle" fill="#94a3b8" font-size="9">23.5°C</text>
+
+      <rect x="30" y="195" width="250" height="35" rx="4" fill="#312e81"/>
+      <text x="155" y="215" text-anchor="middle" fill="#a5b4fc" font-weight="bold">▶ 혼합 시작</text>
+
+      <rect x="30" y="235" width="120" height="30" rx="4" fill="#3a2a1e"/>
+      <text x="90" y="254" text-anchor="middle" fill="#fab387" font-size="10">LED 50%</text>
+
+      <rect x="160" y="235" width="120" height="30" rx="4" fill="#3a2a1e"/>
+      <text x="220" y="254" text-anchor="middle" fill="#fab387" font-size="10">팬 30%</text>
+
+      <text x="160" y="285" text-anchor="middle" fill="#94a3b8" font-size="9">↑ 터치로 조작 (HMI)</text>
+    </g>
+
+    <g font-size="10" fill="#94a3b8">
+      <text x="30" y="318">• /api/status 1초 폴링 (GET)</text>
+      <text x="30" y="335">• /mix, /led, /fan 등 명령 (GET)</text>
+    </g>
+  </g>
+
+  <!-- ===== 회사 DB 서버 (하단 가운데) ===== -->
+  <g transform="translate(440, 570)">
+    <rect x="0" y="0" width="220" height="60" rx="8" fill="#3a2a4a" stroke="#cba6f7" stroke-width="2"/>
+    <text x="110" y="24" text-anchor="middle" fill="#cba6f7" font-size="14" font-weight="bold">🗄 회사 DB 서버</text>
+    <text x="110" y="42" text-anchor="middle" fill="#aaa" font-size="10">192.168.0.??? (API 엔드포인트)</text>
+  </g>
+
+  <!-- ===== 연결선 ===== -->
+  <!-- Pico ↔ 스위치 -->
+  <path d="M 220 200 L 220 170 L 490 170 L 490 110" stroke="#89b4fa" stroke-width="2.5" fill="none"/>
+  <text x="355" y="160" fill="#89b4fa" font-size="11">LAN ①</text>
+
+  <!-- 디스플레이 ↔ 스위치 -->
+  <path d="M 880 200 L 880 170 L 610 170 L 610 110" stroke="#89b4fa" stroke-width="2.5" fill="none"/>
+  <text x="745" y="160" fill="#89b4fa" font-size="11">LAN ②</text>
+
+  <!-- DB 서버 ↔ 스위치 -->
+  <path d="M 550 570 L 550 110" stroke="#cba6f7" stroke-width="2.5" fill="none" stroke-dasharray="4,2"/>
+  <text x="560" y="350" fill="#cba6f7" font-size="11">DB API</text>
+
+  <!-- Pico ↔ 디스플레이 (논리적 통신, 점선) -->
+  <path d="M 380 380 C 480 380, 620 380, 720 380" stroke="#f9e2af" stroke-width="2" fill="none" stroke-dasharray="8,4"/>
+  <text x="550" y="375" text-anchor="middle" fill="#f9e2af" font-size="11">HTTP/JSON (논리적)</text>
+  <text x="550" y="395" text-anchor="middle" fill="#94a3b8" font-size="9">실제로는 둘 다 스위치 거침</text>
+
+</svg>
+</div>
+
+<!-- 범례 -->
+<div class="legend">
+  <div class="legend-item pico">
+    <h3>🌱 Pico W (양액 컨트롤러)</h3>
+    <p>SPI0 → W5500<br>UART1 → RS485 센서<br>GPIO → 펌프/교반/LED/팬<br>역할: <strong>HTTP 서버</strong> 노출</p>
+  </div>
+  <div class="legend-item display">
+    <h3>🖥 RP2350 (터치 디스플레이)</h3>
+    <p>SPI 외부 → W5500 (추가)<br>4" 480×480 IPS<br>역할: <strong>HTTP 클라이언트</strong><br>1초 주기로 /api/status 폴링</p>
+  </div>
+  <div class="legend-item db">
+    <h3>🗄 회사 DB 서버</h3>
+    <p>Pico → POST 적재<br>센서 시계열 + 이벤트<br>(디스플레이도 직접 조회 가능)</p>
+  </div>
+</div>
+
+<div class="note">
+  <strong>📌 통신 흐름</strong><br>
+  1. <strong>Pico → 회사 DB</strong>: 센서값/시퀀스 이벤트 주기적 POST (REST API).<br>
+  2. <strong>디스플레이 → Pico</strong>: <code>GET /api/status</code> 1초 폴링 → 화면 갱신.<br>
+  3. <strong>디스플레이 → Pico</strong>: 터치 시 <code>GET /mix</code>, <code>GET /led?d=80</code> 등 호출 → 동작 실행.<br>
+  4. (옵션) 디스플레이가 회사 DB 직접 조회해서 그래프 등 표시 가능.<br>
+  <br>
+  <strong>⚠ 미구현 / 확인 필요</strong><br>
+  • RP2350-Touch-LCD-4 보드의 <strong>외부 SPI 핀</strong> 확인 → W5500 결선 가능 여부 (LCD 내부 SPI와 별개).<br>
+  • 디스플레이 측 코드: W5500 초기화 + HTTP 클라이언트 + UI 화면. 저분 RS485 통신 코드는 폐기.<br>
+  • 회사 DB API 엔드포인트 (URL + 인증 키) 받기.<br>
+  <br>
+  <strong>✅ 구현 완료</strong><br>
+  • Pico 측 main.py에 JSON API 추가: <code>/api/status</code>, <code>/api/sensors</code>, <code>/api/recipe</code>.<br>
+  • RS485 센서 모듈 sensors.py (별 스레드 5초 폴링).<br>
+  • W5500 SPI0 핀맵 + 회로도 (LAN 케이블만 꽂으면 됨).
+</div>
+
+</body>
+</html>

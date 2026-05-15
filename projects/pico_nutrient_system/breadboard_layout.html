@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>빵판 배치도 — Pico W 시스템</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #1e1e2e;
+    color: #eee;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { color: #89b4fa; margin-bottom: 6px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  .container {
+    background: #2a2a3a;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  svg { display: block; }
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+    max-width: 1200px;
+    width: 100%;
+  }
+  .legend-item {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    background: #2a2a3a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .swatch {
+    width: 28px;
+    height: 5px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .note {
+    margin-top: 20px;
+    max-width: 1200px;
+    padding: 14px 18px;
+    background: #2a2a3a;
+    border-radius: 8px;
+    border-left: 4px solid #f9e2af;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #ccc;
+  }
+  .note strong { color: #f9e2af; }
+</style>
+</head>
+<body>
+
+<h1>🔌 빵판 배치도 — 양액 시스템 측</h1>
+<div class="subtitle">Pico W + W5500 + MAX485 + 외부 모듈 (MOSFET ×2, LM2596, WAGO)<br>
+디스플레이 측은 별도 빵판: <a href="display_layout.html" style="color:#f9e2af">display_layout.html</a> · 네트워크 토폴로지: <a href="network_topology.html" style="color:#89b4fa">network_topology.html</a></div>
+
+<div class="container">
+<svg width="1200" height="900" viewBox="0 0 1200 900">
+
+  <!-- ===== 빵판 배경 ===== -->
+  <rect x="100" y="60" width="900" height="280" rx="10" fill="#f5f5dc" stroke="#888" stroke-width="2"/>
+  <text x="550" y="50" text-anchor="middle" fill="#a6e3a1" font-size="14" font-weight="bold">메인 빵판 (Full-size 830홀)</text>
+
+  <!-- 상단 전원 레일 -->
+  <rect x="120" y="75" width="860" height="20" fill="#3a1a1a" stroke="#c33" stroke-width="1"/>
+  <text x="110" y="89" text-anchor="end" fill="#f38ba8" font-size="11" font-weight="bold">+ 3V3</text>
+  <line x1="120" y1="85" x2="980" y2="85" stroke="#c33" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <rect x="120" y="100" width="860" height="20" fill="#1a1a1a" stroke="#666" stroke-width="1"/>
+  <text x="110" y="114" text-anchor="end" fill="#888" font-size="11" font-weight="bold">− GND</text>
+  <line x1="120" y1="110" x2="980" y2="110" stroke="#666" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <!-- 하단 전원 레일 -->
+  <rect x="120" y="285" width="860" height="20" fill="#1a1a1a" stroke="#666" stroke-width="1"/>
+  <text x="110" y="299" text-anchor="end" fill="#888" font-size="11" font-weight="bold">− GND</text>
+  <line x1="120" y1="295" x2="980" y2="295" stroke="#666" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <rect x="120" y="310" width="860" height="20" fill="#2a2a2a" stroke="#555" stroke-width="1"/>
+  <text x="110" y="324" text-anchor="end" fill="#777" font-size="11" font-weight="bold">(비움)</text>
+
+  <!-- 빵판 중앙 갭 -->
+  <rect x="120" y="195" width="860" height="10" fill="#d4c8a8"/>
+
+  <!-- ===== Pico WH (가로 방향, USB ← 좌측) ===== -->
+  <!-- 실제 빵판에 꽂는 방향: 보드가 길어서 가로로 눕혀야 함. -->
+  <g transform="translate(395, 170)">
+    <!-- 보드 본체 (가로 280×60) -->
+    <rect x="0" y="0" width="280" height="60" rx="6" fill="#2d4a2d" stroke="#3a5a3a" stroke-width="2"/>
+
+    <!-- USB 커넥터 (왼쪽 끝) -->
+    <rect x="-22" y="18" width="22" height="24" fill="#c0c0c0" stroke="#666" stroke-width="1.5"/>
+    <text x="-11" y="35" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">USB</text>
+
+    <!-- 보드 타이틀 -->
+    <text x="140" y="22" text-anchor="middle" fill="#a6e3a1" font-size="13" font-weight="bold">Pico WH</text>
+    <text x="140" y="36" text-anchor="middle" fill="#888" font-size="9">가로 방향 (USB ← 좌측)</text>
+    <text x="140" y="50" text-anchor="middle" fill="#fbbf24" font-size="9">★ 디테일 핀맵: pico_pinmap.html</text>
+
+    <!-- 상단 핀들 (보드 위쪽 가장자리, 핀 번호 40→21 좌→우) -->
+    <!-- 20핀: 색만 표시, 라벨은 일부 핵심만 -->
+    <g font-size="6" fill="#fff">
+      <!-- y=4 (보드 위쪽 가장자리) -->
+      <circle cx="8" cy="4" r="2.5" fill="#666"/>     <!-- 40 VBUS -->
+      <circle cx="22" cy="4" r="2.5" fill="#f5c2e7"/> <!-- 39 VSYS -->
+      <circle cx="36" cy="4" r="2.5" fill="#666"/>   <!-- 38 GND -->
+      <circle cx="50" cy="4" r="2.5" fill="#666"/>   <!-- 37 3V3_EN -->
+      <circle cx="64" cy="4" r="2.5" fill="#f38ba8"/><!-- 36 3V3 OUT -->
+      <circle cx="78" cy="4" r="2.5" fill="#666"/>   <!-- 35 VREF -->
+      <circle cx="92" cy="4" r="2.5" fill="#94e2d5"/><!-- 34 GP28 ADC -->
+      <circle cx="106" cy="4" r="2.5" fill="#666"/>  <!-- 33 AGND -->
+      <circle cx="120" cy="4" r="2.5" fill="#94e2d5"/><!-- 32 GP27 ADC -->
+      <circle cx="134" cy="4" r="2.5" fill="#94e2d5"/><!-- 31 GP26 ADC -->
+      <circle cx="148" cy="4" r="2.5" fill="#666"/>  <!-- 30 RUN -->
+      <circle cx="162" cy="4" r="2.5" fill="#666"/>  <!-- 29 GP22 -->
+      <circle cx="176" cy="4" r="2.5" fill="#666"/>  <!-- 28 GND -->
+      <circle cx="190" cy="4" r="2.5" fill="#666"/>  <!-- 27 GP21 -->
+      <circle cx="204" cy="4" r="2.5" fill="#a6e3a1"/><!-- 26 GP20 RS485 대안 DE -->
+      <circle cx="218" cy="4" r="2.5" fill="#666"/>  <!-- 25 GP19 -->
+      <circle cx="232" cy="4" r="2.5" fill="#f9e2af"/><!-- 24 GP18★ 팬 PWM -->
+      <circle cx="246" cy="4" r="2.5" fill="#666"/>  <!-- 23 GND -->
+      <circle cx="260" cy="4" r="2.5" fill="#666"/>  <!-- 22 GP17 -->
+      <circle cx="272" cy="4" r="2.5" fill="#f9e2af"/><!-- 21 GP16★ LED PWM -->
+    </g>
+
+    <!-- 핵심 상단 핀 라벨 -->
+    <g font-size="7" fill="#f5c2e7">
+      <text x="22" y="-2" text-anchor="middle">VSYS</text>
+    </g>
+    <g font-size="7" fill="#f38ba8">
+      <text x="64" y="-2" text-anchor="middle">3V3</text>
+    </g>
+    <g font-size="7" fill="#f9e2af">
+      <text x="232" y="-2" text-anchor="middle">GP18★</text>
+      <text x="272" y="-2" text-anchor="middle">GP16★</text>
+    </g>
+    <g font-size="7" fill="#a6e3a1">
+      <text x="204" y="-2" text-anchor="middle">GP20</text>
+    </g>
+
+    <!-- 하단 핀들 (보드 아래쪽 가장자리, 핀 번호 1→20 좌→우) -->
+    <g font-size="6" fill="#fff">
+      <!-- y=56 -->
+      <circle cx="8" cy="56" r="2.5" fill="#a6e3a1"/>  <!-- 1 GP0 (RS485 대안 TX) -->
+      <circle cx="22" cy="56" r="2.5" fill="#a6e3a1"/> <!-- 2 GP1 (RS485 대안 RX) -->
+      <circle cx="36" cy="56" r="2.5" fill="#666"/>    <!-- 3 GND -->
+      <circle cx="50" cy="56" r="2.5" fill="#89b4fa"/> <!-- 4 GP2 W5500 SCK -->
+      <circle cx="64" cy="56" r="2.5" fill="#89b4fa"/> <!-- 5 GP3 MOSI -->
+      <circle cx="78" cy="56" r="2.5" fill="#89b4fa"/> <!-- 6 GP4 MISO -->
+      <circle cx="92" cy="56" r="2.5" fill="#89b4fa"/> <!-- 7 GP5 CS -->
+      <circle cx="106" cy="56" r="2.5" fill="#666"/>   <!-- 8 GND -->
+      <circle cx="120" cy="56" r="2.5" fill="#89b4fa"/><!-- 9 GP6 RST -->
+      <circle cx="134" cy="56" r="2.5" fill="#89b4fa"/><!-- 10 GP7 INT -->
+      <circle cx="148" cy="56" r="2.5" fill="#a6e3a1"/><!-- 11 GP8 MAX485 DI -->
+      <circle cx="162" cy="56" r="2.5" fill="#a6e3a1"/><!-- 12 GP9 RO -->
+      <circle cx="176" cy="56" r="2.5" fill="#666"/>   <!-- 13 GND -->
+      <circle cx="190" cy="56" r="2.5" fill="#a6e3a1"/><!-- 14 GP10 DE/RE -->
+      <circle cx="204" cy="56" r="2.5" fill="#cba6f7"/><!-- 15 GP11 교반기 -->
+      <circle cx="218" cy="56" r="2.5" fill="#fab387"/><!-- 16 GP12 펌프 CH4 -->
+      <circle cx="232" cy="56" r="2.5" fill="#fab387"/><!-- 17 GP13 펌프 CH3 PWM -->
+      <circle cx="246" cy="56" r="2.5" fill="#666"/>   <!-- 18 GND -->
+      <circle cx="260" cy="56" r="2.5" fill="#fab387"/><!-- 19 GP14 펌프 CH2 PWM -->
+      <circle cx="272" cy="56" r="2.5" fill="#fab387"/><!-- 20 GP15 펌프 CH1 -->
+    </g>
+
+    <!-- 핵심 하단 핀 라벨 -->
+    <g font-size="7" fill="#a6e3a1">
+      <text x="8" y="68" text-anchor="middle">GP0</text>
+      <text x="22" y="68" text-anchor="middle">GP1</text>
+      <text x="148" y="68" text-anchor="middle">GP8</text>
+      <text x="162" y="68" text-anchor="middle">GP9</text>
+      <text x="190" y="68" text-anchor="middle">GP10</text>
+    </g>
+    <g font-size="7" fill="#89b4fa">
+      <text x="50" y="68" text-anchor="middle">GP2</text>
+      <text x="92" y="68" text-anchor="middle">GP5</text>
+    </g>
+    <g font-size="7" fill="#cba6f7">
+      <text x="204" y="68" text-anchor="middle">GP11</text>
+    </g>
+    <g font-size="7" fill="#fab387">
+      <text x="218" y="68" text-anchor="middle">GP12</text>
+      <text x="272" y="68" text-anchor="middle">GP15</text>
+    </g>
+  </g>
+
+  <!-- ===== W5500 모듈 (왼쪽) — 라벨: MO/MI/SCS/SCK/RST/INT ===== -->
+  <g transform="translate(160, 145)">
+    <rect x="0" y="0" width="160" height="145" rx="6" fill="#1e3a5f" stroke="#89b4fa" stroke-width="2"/>
+    <text x="80" y="18" text-anchor="middle" fill="#89b4fa" font-size="13" font-weight="bold">W5500</text>
+    <text x="80" y="32" text-anchor="middle" fill="#aaa" font-size="9">이더넷 모듈 (SPI0)</text>
+
+    <g font-size="9" fill="#fff">
+      <text x="10" y="49">VCC ← 3V3</text>
+      <text x="10" y="62">GND ← GND</text>
+      <text x="10" y="75">SCK ← GP2</text>
+      <text x="10" y="88">MO  ← GP3 (MOSI)</text>
+      <text x="10" y="101">MI  → GP4 (MISO)</text>
+      <text x="10" y="114">SCS ← GP5 (CS)</text>
+      <text x="10" y="127">RST ← GP6</text>
+      <text x="10" y="140">INT → GP7</text>
+    </g>
+    <rect x="105" y="115" width="50" height="22" fill="#333" stroke="#888"/>
+    <text x="130" y="129" text-anchor="middle" fill="#fff" font-size="8">RJ45</text>
+  </g>
+
+  <!-- ===== RS485 자동방향 모듈 #1 (센서용, 오른쪽) — 4핀: VCC/GND/TX/RX ===== -->
+  <g transform="translate(720, 145)">
+    <rect x="0" y="0" width="160" height="130" rx="6" fill="#1e4a3a" stroke="#a6e3a1" stroke-width="2"/>
+    <text x="80" y="18" text-anchor="middle" fill="#a6e3a1" font-size="13" font-weight="bold">RS485 #1 (센서)</text>
+    <text x="80" y="32" text-anchor="middle" fill="#aaa" font-size="9">자동방향 4핀 모듈</text>
+
+    <g font-size="10" fill="#fff">
+      <text x="10" y="52">VCC ← 3V3</text>
+      <text x="10" y="68">GND ← GND</text>
+      <text x="10" y="84">RX  ← GP8 (Pico TX)</text>
+      <text x="10" y="100">TX  → GP9 (Pico RX)</text>
+      <text x="80" y="118" text-anchor="middle" fill="#a6e3a1" font-size="9">A/B → 센서 버스</text>
+    </g>
+  </g>
+
+  <!-- ===== 외부 영역 구분선 ===== -->
+  <line x1="50" y1="370" x2="1150" y2="370" stroke="#555" stroke-width="1" stroke-dasharray="8,4"/>
+  <text x="60" y="365" fill="#888" font-size="11" font-style="italic">↑ 빵판 위 / ↓ 빵판 밖 (양면테이프로 평판에 고정)</text>
+
+  <!-- ===== 12V 어댑터 ===== -->
+  <g transform="translate(80, 400)">
+    <rect x="0" y="0" width="140" height="60" rx="6" fill="#4a1e3a" stroke="#f5c2e7" stroke-width="2"/>
+    <text x="70" y="22" text-anchor="middle" fill="#f5c2e7" font-size="13" font-weight="bold">12V / 5A</text>
+    <text x="70" y="38" text-anchor="middle" fill="#aaa" font-size="10">어댑터</text>
+    <text x="70" y="52" text-anchor="middle" fill="#fff" font-size="11">+ / −</text>
+  </g>
+
+  <!-- ===== WAGO + #1 ===== -->
+  <g transform="translate(260, 400)">
+    <rect x="0" y="0" width="90" height="60" rx="4" fill="#3a2a4a" stroke="#cba6f7" stroke-width="2"/>
+    <text x="45" y="16" text-anchor="middle" fill="#cba6f7" font-size="11" font-weight="bold">WAGO+ #1</text>
+    <text x="45" y="29" text-anchor="middle" fill="#aaa" font-size="9">3구</text>
+    <circle cx="20" cy="45" r="4" fill="#c33"/>
+    <circle cx="45" cy="45" r="4" fill="#c33"/>
+    <circle cx="70" cy="45" r="4" fill="#c33"/>
+    <text x="20" y="58" text-anchor="middle" fill="#fff" font-size="7">in</text>
+    <text x="45" y="58" text-anchor="middle" fill="#fff" font-size="7">→#2</text>
+    <text x="70" y="58" text-anchor="middle" fill="#fff" font-size="7">1번 M1</text>
+  </g>
+
+  <!-- ===== WAGO + #2 ===== -->
+  <g transform="translate(370, 400)">
+    <rect x="0" y="0" width="90" height="60" rx="4" fill="#3a2a4a" stroke="#cba6f7" stroke-width="2"/>
+    <text x="45" y="16" text-anchor="middle" fill="#cba6f7" font-size="11" font-weight="bold">WAGO+ #2</text>
+    <text x="45" y="29" text-anchor="middle" fill="#aaa" font-size="9">3구</text>
+    <circle cx="20" cy="45" r="4" fill="#c33"/>
+    <circle cx="45" cy="45" r="4" fill="#c33"/>
+    <circle cx="70" cy="45" r="4" fill="#c33"/>
+    <text x="20" y="58" text-anchor="middle" fill="#fff" font-size="7">←#1</text>
+    <text x="45" y="58" text-anchor="middle" fill="#fff" font-size="7">2번 M1</text>
+    <text x="70" y="58" text-anchor="middle" fill="#fff" font-size="7">LM IN+</text>
+  </g>
+
+  <!-- ===== WAGO − (5구 1개) ===== -->
+  <g transform="translate(490, 395)">
+    <rect x="0" y="0" width="150" height="70" rx="4" fill="#2a2a3a" stroke="#bbb" stroke-width="2"/>
+    <text x="75" y="16" text-anchor="middle" fill="#bbb" font-size="12" font-weight="bold">WAGO− (5구)</text>
+    <text x="75" y="29" text-anchor="middle" fill="#aaa" font-size="9">GND 분배 한 덩어리</text>
+    <circle cx="18" cy="48" r="4" fill="#222"/>
+    <circle cx="45" cy="48" r="4" fill="#222"/>
+    <circle cx="72" cy="48" r="4" fill="#222"/>
+    <circle cx="99" cy="48" r="4" fill="#222"/>
+    <circle cx="126" cy="48" r="4" fill="#222"/>
+    <text x="18" y="62" text-anchor="middle" fill="#fff" font-size="7">어댑−</text>
+    <text x="45" y="62" text-anchor="middle" fill="#fff" font-size="7">1번G</text>
+    <text x="72" y="62" text-anchor="middle" fill="#fff" font-size="7">2번G</text>
+    <text x="99" y="62" text-anchor="middle" fill="#fff" font-size="7">LM−</text>
+    <text x="126" y="62" text-anchor="middle" fill="#888" font-size="7">예비</text>
+  </g>
+
+  <!-- ===== LM2596 ===== -->
+  <g transform="translate(740, 395)">
+    <rect x="0" y="0" width="140" height="70" rx="6" fill="#3a3a1e" stroke="#f9e2af" stroke-width="2"/>
+    <text x="70" y="18" text-anchor="middle" fill="#f9e2af" font-size="13" font-weight="bold">LM2596</text>
+    <text x="70" y="32" text-anchor="middle" fill="#aaa" font-size="9">12V → 5V 벅컨버터</text>
+    <text x="15" y="50" fill="#fff" font-size="9">IN+ ← 12V</text>
+    <text x="15" y="62" fill="#fff" font-size="9">IN− ← GND</text>
+    <text x="80" y="50" fill="#fff" font-size="9">OUT+ → VSYS</text>
+    <text x="80" y="62" fill="#fff" font-size="9">OUT− → GND레일</text>
+  </g>
+
+  <!-- ===== 1번 4ch MOSFET (펌프) ===== -->
+  <g transform="translate(100, 550)">
+    <rect x="0" y="0" width="320" height="120" rx="8" fill="#4a3a1e" stroke="#fab387" stroke-width="2"/>
+    <text x="160" y="20" text-anchor="middle" fill="#fab387" font-size="14" font-weight="bold">1번 4ch MOSFET 모듈 (펌프 전용)</text>
+    <text x="160" y="35" text-anchor="middle" fill="#aaa" font-size="10">M1=12V+, GND, CH1~4 입력 S</text>
+
+    <!-- 채널 박스 -->
+    <g font-size="10">
+      <rect x="20" y="50" width="60" height="55" fill="#5a4520" stroke="#fab387"/>
+      <text x="50" y="65" text-anchor="middle" fill="#fff">CH1</text>
+      <text x="50" y="80" text-anchor="middle" fill="#fab387" font-size="8">S←GP15</text>
+      <text x="50" y="95" text-anchor="middle" fill="#fff" font-size="8">→KPHM</text>
+
+      <rect x="90" y="50" width="60" height="55" fill="#5a4520" stroke="#fab387"/>
+      <text x="120" y="65" text-anchor="middle" fill="#fff">CH2</text>
+      <text x="120" y="80" text-anchor="middle" fill="#fab387" font-size="8">S←GP14</text>
+      <text x="120" y="95" text-anchor="middle" fill="#fff" font-size="8">→KamA</text>
+
+      <rect x="160" y="50" width="60" height="55" fill="#5a4520" stroke="#fab387"/>
+      <text x="190" y="65" text-anchor="middle" fill="#fff">CH3</text>
+      <text x="190" y="80" text-anchor="middle" fill="#fab387" font-size="8">S←GP13</text>
+      <text x="190" y="95" text-anchor="middle" fill="#fff" font-size="8">→KamB</text>
+
+      <rect x="230" y="50" width="60" height="55" fill="#5a4520" stroke="#fab387"/>
+      <text x="260" y="65" text-anchor="middle" fill="#fff">CH4</text>
+      <text x="260" y="80" text-anchor="middle" fill="#fab387" font-size="8">S←GP12</text>
+      <text x="260" y="95" text-anchor="middle" fill="#fff" font-size="8">→다이프</text>
+    </g>
+  </g>
+
+  <!-- ===== 2번 4ch MOSFET (교반/LED/팬) ===== -->
+  <g transform="translate(460, 550)">
+    <rect x="0" y="0" width="320" height="120" rx="8" fill="#3a2a4a" stroke="#cba6f7" stroke-width="2"/>
+    <text x="160" y="20" text-anchor="middle" fill="#cba6f7" font-size="14" font-weight="bold">2번 4ch MOSFET 모듈 (교반/LED/팬)</text>
+    <text x="160" y="35" text-anchor="middle" fill="#aaa" font-size="10">M1=12V+, GND, CH1~4 입력 S</text>
+
+    <g font-size="10">
+      <rect x="20" y="50" width="60" height="55" fill="#4a3a5a" stroke="#cba6f7"/>
+      <text x="50" y="65" text-anchor="middle" fill="#fff">CH1</text>
+      <text x="50" y="80" text-anchor="middle" fill="#cba6f7" font-size="8">S←GP11</text>
+      <text x="50" y="95" text-anchor="middle" fill="#fff" font-size="8">→교반기</text>
+
+      <rect x="90" y="50" width="60" height="55" fill="#5a5520" stroke="#f9e2af"/>
+      <text x="120" y="65" text-anchor="middle" fill="#fff">CH2</text>
+      <text x="120" y="80" text-anchor="middle" fill="#f9e2af" font-size="8">S←GP16</text>
+      <text x="120" y="95" text-anchor="middle" fill="#fff" font-size="8">→LED★</text>
+
+      <rect x="160" y="50" width="60" height="55" fill="#5a5520" stroke="#f9e2af"/>
+      <text x="190" y="65" text-anchor="middle" fill="#fff">CH3</text>
+      <text x="190" y="80" text-anchor="middle" fill="#f9e2af" font-size="8">S←GP18</text>
+      <text x="190" y="95" text-anchor="middle" fill="#fff" font-size="8">→팬★</text>
+
+      <rect x="230" y="50" width="60" height="55" fill="#3a3a3a" stroke="#666"/>
+      <text x="260" y="65" text-anchor="middle" fill="#888">CH4</text>
+      <text x="260" y="85" text-anchor="middle" fill="#666" font-size="8">예비</text>
+    </g>
+  </g>
+
+  <!-- ===== 부하 라벨 (맨 아래) ===== -->
+  <g transform="translate(50, 730)" font-size="11" fill="#aaa">
+    <text x="0" y="15">⬇ 펌프 출력 (12V):</text>
+    <rect x="120" y="5" width="80" height="20" fill="#5a4520" stroke="#fab387"/>
+    <text x="160" y="20" text-anchor="middle" fill="#fff" font-size="10">KPHM100</text>
+    <rect x="210" y="5" width="80" height="20" fill="#5a4520" stroke="#fab387"/>
+    <text x="250" y="20" text-anchor="middle" fill="#fff" font-size="10">Kamoer A</text>
+    <rect x="300" y="5" width="80" height="20" fill="#5a4520" stroke="#fab387"/>
+    <text x="340" y="20" text-anchor="middle" fill="#fff" font-size="10">Kamoer B</text>
+    <rect x="390" y="5" width="80" height="20" fill="#5a4520" stroke="#fab387"/>
+    <text x="430" y="20" text-anchor="middle" fill="#fff" font-size="10">다이어프램</text>
+
+    <text x="0" y="55">⬇ 부수 부하 (12V):</text>
+    <rect x="120" y="45" width="80" height="20" fill="#4a3a5a" stroke="#cba6f7"/>
+    <text x="160" y="60" text-anchor="middle" fill="#fff" font-size="10">교반기</text>
+    <rect x="210" y="45" width="80" height="20" fill="#5a5520" stroke="#f9e2af"/>
+    <text x="250" y="60" text-anchor="middle" fill="#fff" font-size="10">LED 스트립</text>
+    <rect x="300" y="45" width="80" height="20" fill="#5a5520" stroke="#f9e2af"/>
+    <text x="340" y="60" text-anchor="middle" fill="#fff" font-size="10">팬 (+다이오드)</text>
+  </g>
+
+  <!-- ===== 센서 라벨 (RS485 Modbus RTU, 9600 baud) ===== -->
+  <g transform="translate(820, 720)" font-size="11" fill="#aaa">
+    <text x="0" y="12">⬅ RS485 센서 버스 (Modbus RTU)</text>
+    <text x="0" y="25" fill="#a6e3a1" font-size="10">현재 보유 3개 (addr 1/2/3)</text>
+
+    <rect x="0" y="32" width="85" height="22" fill="#1e4a3a" stroke="#a6e3a1"/>
+    <text x="42" y="42" text-anchor="middle" fill="#fff" font-size="9">온습도</text>
+    <text x="42" y="51" text-anchor="middle" fill="#a6e3a1" font-size="8">addr 1 ✓검증</text>
+
+    <rect x="95" y="32" width="85" height="22" fill="#1e4a3a" stroke="#a6e3a1"/>
+    <text x="137" y="42" text-anchor="middle" fill="#fff" font-size="9">토양수분</text>
+    <text x="137" y="51" text-anchor="middle" fill="#fbbf24" font-size="8">addr 2 ⚠레지스터?</text>
+
+    <rect x="0" y="60" width="85" height="22" fill="#1e4a3a" stroke="#a6e3a1"/>
+    <text x="42" y="70" text-anchor="middle" fill="#fff" font-size="9">EC</text>
+    <text x="42" y="79" text-anchor="middle" fill="#fbbf24" font-size="8">addr 3 ⚠레지스터?</text>
+
+    <rect x="95" y="60" width="85" height="22" fill="#3a3a3a" stroke="#666"/>
+    <text x="137" y="70" text-anchor="middle" fill="#888" font-size="9">pH</text>
+    <text x="137" y="79" text-anchor="middle" fill="#888" font-size="8">재주문 중</text>
+
+    <text x="0" y="100" fill="#888" font-size="9">※ 데이지체인 + 종단저항 120Ω ×2</text>
+    <text x="0" y="112" fill="#888" font-size="9">※ 출고 기본 addr=1, 1개씩 변경 필요</text>
+  </g>
+
+  <!-- ===== 와이어들 (대표선만) ===== -->
+  <!-- 12V 어댑터 → WAGO+ #1 -->
+  <path d="M 220 415 L 270 415" stroke="#c33" stroke-width="3" fill="none"/>
+  <!-- WAGO+ #1 → #2 점퍼 -->
+  <path d="M 305 445 L 305 470 L 390 470 L 390 445" stroke="#c33" stroke-width="2.5" fill="none"/>
+  <!-- WAGO+ #1 → 1번 MOSFET 12V -->
+  <path d="M 330 460 L 330 540" stroke="#c33" stroke-width="2.5" fill="none"/>
+  <!-- WAGO+ #2 → 2번 MOSFET 12V -->
+  <path d="M 415 460 L 415 525 L 580 525 L 580 540" stroke="#c33" stroke-width="2.5" fill="none"/>
+  <!-- WAGO+ #2 → LM2596 -->
+  <path d="M 440 460 L 440 480 L 760 480 L 760 460" stroke="#c33" stroke-width="2.5" fill="none"/>
+
+  <!-- 12V 어댑터 → WAGO− (5구) 첫 핀 -->
+  <path d="M 220 435 L 240 435 L 240 515 L 508 515 L 508 470" stroke="#222" stroke-width="3" fill="none"/>
+  <!-- WAGO− → 1번 MOSFET GND -->
+  <path d="M 535 465 L 535 525 L 380 525 L 380 540" stroke="#222" stroke-width="2.5" fill="none"/>
+  <!-- WAGO− → 2번 MOSFET GND -->
+  <path d="M 562 465 L 562 530 L 620 530 L 620 540" stroke="#222" stroke-width="2.5" fill="none"/>
+  <!-- WAGO− → LM2596 IN− -->
+  <path d="M 589 465 L 589 485 L 760 485 L 760 460" stroke="#222" stroke-width="2.5" fill="none"/>
+
+  <!-- LM2596 OUT → Pico VSYS (분홍, 상단 핀 39) -->
+  <path d="M 880 425 L 920 425 L 920 175 L 417 175" stroke="#f5c2e7" stroke-width="2.5" fill="none"/>
+  <text x="930" y="200" fill="#f5c2e7" font-size="9">5V → VSYS</text>
+
+  <!-- LM2596 OUT- → 빵판 GND -->
+  <path d="M 880 445 L 1000 445 L 1000 110 L 980 110" stroke="#666" stroke-width="2.5" fill="none"/>
+  <text x="940" y="100" fill="#666" font-size="9">GND</text>
+
+  <!-- Pico → 1번 MOSFET 신호선 (GP12~15, 펌프) - 하단 핀에서 아래로 -->
+  <path d="M 613 232 L 613 540" stroke="#fab387" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+  <path d="M 627 232 L 627 540" stroke="#fab387" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+  <path d="M 655 232 L 655 540" stroke="#fab387" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+  <path d="M 667 232 L 667 540" stroke="#fab387" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+  <text x="675" y="380" fill="#fab387" font-size="9">GP12~15</text>
+  <text x="675" y="392" fill="#f9e2af" font-size="8">CH2/3=PWM 33%</text>
+
+  <!-- Pico → 2번 MOSFET 신호선 (GP11=교반 하단, GP16/18=상단) -->
+  <path d="M 599 232 L 599 540" stroke="#cba6f7" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+  <text x="525" y="540" fill="#cba6f7" font-size="9">GP11 교반</text>
+  <!-- GP16/18은 보드 위쪽이라 위로 돌아 내려와야 함 -->
+  <path d="M 627 170 L 627 155 L 540 155 L 540 540" stroke="#f9e2af" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+  <path d="M 667 170 L 667 145 L 560 145 L 560 540" stroke="#f9e2af" stroke-width="1.5" fill="none" stroke-dasharray="2,2"/>
+  <text x="510" y="380" fill="#f9e2af" font-size="9">GP16/18 LED/팬</text>
+  <text x="510" y="392" fill="#f9e2af" font-size="8">(상단핀→위로돌아)</text>
+
+  <!-- MAX485 → 센서 -->
+  <path d="M 880 250 L 920 250 L 920 740 L 820 740" stroke="#a6e3a1" stroke-width="2" fill="none"/>
+  <text x="900" y="500" fill="#a6e3a1" font-size="9">A/B 버스</text>
+
+  <!-- 빵판 내부 점퍼: Pico 하단 핀 GP2~5 (W5500 SPI) ↔ W5500 모듈 -->
+  <path d="M 445 232 L 445 295 L 320 295 L 320 235" stroke="#89b4fa" stroke-width="1.5" fill="none"/>
+  <path d="M 459 232 L 459 305 L 305 305 L 305 235" stroke="#89b4fa" stroke-width="1.5" fill="none"/>
+  <path d="M 473 232 L 473 315 L 290 315 L 290 235" stroke="#89b4fa" stroke-width="1.5" fill="none"/>
+  <path d="M 487 232 L 487 325 L 275 325 L 275 235" stroke="#89b4fa" stroke-width="1.5" fill="none"/>
+  <text x="380" y="320" fill="#89b4fa" font-size="9">SPI ×4</text>
+
+  <!-- Pico GP8/9 (UART1) ↔ RS485 #1 (자동방향 2선만 필요, GP10 미사용) -->
+  <path d="M 543 232 L 543 250 L 720 250" stroke="#a6e3a1" stroke-width="1.5" fill="none"/>
+  <path d="M 557 232 L 557 260 L 720 260" stroke="#a6e3a1" stroke-width="1.5" fill="none"/>
+  <text x="640" y="245" fill="#a6e3a1" font-size="9">UART1 (GP8/9)</text>
+  <text x="640" y="257" fill="#888" font-size="8">GP10 미사용 (자동방향)</text>
+
+  <!-- Pico 3V3 (상단 핀 36) → 레일 -->
+  <path d="M 459 170 L 459 130 L 985 130 L 985 85" stroke="#f38ba8" stroke-width="2" fill="none"/>
+  <text x="700" y="125" fill="#f38ba8" font-size="9">3V3 → 빵판 레일 + W5500/MAX485 VCC</text>
+
+</svg>
+</div>
+
+<!-- ===== 범례 ===== -->
+<div class="legend">
+  <div class="legend-item"><div class="swatch" style="background:#c33"></div>+12V (굵게, 18AWG)</div>
+  <div class="legend-item"><div class="swatch" style="background:#222"></div>GND (굵게, 18AWG)</div>
+  <div class="legend-item"><div class="swatch" style="background:#f5c2e7"></div>5V (LM2596→VSYS)</div>
+  <div class="legend-item"><div class="swatch" style="background:#f38ba8"></div>3V3 (Pico→모듈)</div>
+  <div class="legend-item"><div class="swatch" style="background:#89b4fa"></div>SPI (W5500)</div>
+  <div class="legend-item"><div class="swatch" style="background:#a6e3a1"></div>UART/RS485</div>
+  <div class="legend-item"><div class="swatch" style="background:#fab387"></div>펌프 신호 (GP12~15)</div>
+  <div class="legend-item"><div class="swatch" style="background:#cba6f7"></div>교반/PWM 신호</div>
+</div>
+
+<div class="note">
+  <strong>📌 배치 핵심</strong><br>
+  • <strong>Pico WH 방향</strong>: 보드가 길어서 <strong>USB를 좌측(또는 우측)으로 향하게 가로로</strong> 꽂음. USB를 위로 향하면 빵판 끝에서 튀어나옴.<br>
+  • <strong>핀 위치 (가로 꽂은 기준)</strong>: 상단 = 핀 40~21 (USB 반대편), 하단 = 핀 1~20 (USB 쪽 행). 위 도면 상단 = VBUS/VSYS/3V3/...GP16, 하단 = GP0/GP1/.../GP15.<br>
+  • <strong>빵판 위</strong>: Pico WH (가로, 가운데) + W5500 (좌) + MAX485 (우). 신호선만, 12V 절대 X.<br>
+  • <strong>빵판 밖</strong>: 12V 어댑터, <strong>WAGO 3개 (3구×2 + 5구×1)</strong>, LM2596, 4ch MOSFET 모듈 2개. 양면테이프로 평판에 고정.<br>
+  • <strong>+12V 분배</strong>: 어댑터+ → WAGO+ #1 (3구) → 점퍼 → WAGO+ #2 (3구) → 1번/2번 MOSFET + LM2596 IN+.<br>
+  • <strong>GND 분배</strong>: 어댑터− → WAGO− (5구 한 덩어리) → 1번/2번 MOSFET GND + LM2596 IN− (+ 1자리 예비).<br>
+  • <strong>빵판 GND 진입점</strong>: LM2596 OUT−에서 1가닥으로 → 빵판 GND 레일 (12V GND랑 자연 공통).<br>
+  • <strong>신호선</strong>: Pico GPIO → MOSFET S핀까지 점퍼와이어. 펌프(노랑) vs 교반/PWM(보라) 색 구분 추천.<br>
+  <br>
+  <strong>⚡ PWM 운용 (SZH-AT021 포토커플러 한계: 1~2kHz)</strong><br>
+  • <strong>양액 펌프 CH2/CH3</strong>: <strong>PWM 1kHz, 33% duty</strong> → 30 mL/min → 2mL 4초 (±2.5%)<br>
+  • <strong>LED 스트립 (GP16)</strong>: PWM 1kHz, 0~100% 디밍<br>
+  • <strong>팬 (GP18)</strong>: PWM 1kHz, start kick 포함 (저듀티 stall 방지)<br>
+  • <strong>급수 CH1 / 출수 CH4 / 교반 GP11</strong>: ON/OFF (PWM 안 씀)<br>
+  <br>
+  <strong>📡 RS485 센서 (Modbus RTU 9600 baud)</strong><br>
+  • <strong>보유 센서 (저분과 동일)</strong>: 온습도 addr 0x01 / <strong>토양 5-in-1</strong> addr 0x02 (수분/온도/EC/pH/N/P/K 한 센서) — 양액 EC/pH는 별도 센서.<br>
+  • <strong>RS485 모듈은 자동방향</strong>: 4핀만 (VCC/GND/TX/RX). DI/RO/DE/RE 아님. <strong>Pico TX → 모듈 RX, Pico RX → 모듈 TX 교차</strong>.<br>
+  • GP10은 이번 모듈에서 미사용 (자동방향이라 DE/RE 신호 안 들어감). 코드는 토글하지만 외부 영향 없음.<br>
+  • <strong>주의</strong>: 출고 기본 addr=1이라 멀티드롭 전 1개씩 addr 변경 필요 (tools_change_sensor_addr.py).<br>
+  <br>
+  <strong>🔌 W5500 라벨 (절충형)</strong><br>
+  • <strong>MO</strong> = MOSI, <strong>MI</strong> = MISO, <strong>SCS</strong> = CS · SCK/RST/INT는 그대로<br>
+  • 결선: VCC←3V3, GND, SCK←GP2, MO←GP3, MI→GP4, SCS←GP5, RST←GP6, INT→GP7<br>
+  <br>
+  <strong>🔌 기타</strong><br>
+  • <strong>RS485 종단저항</strong>: 120Ω을 버스 양 끝(MAX485 측 + 마지막 센서 측)에 각각 1개.<br>
+  • <strong>팬 환류 다이오드</strong>: 1N5819 또는 1N4007 (캐소드=12V+, 애노드=팬 −).<br>
+  • <strong>전원 용량</strong>: 펌프+LED+팬 동시 피크 ~5A → <strong>12V/5A 어댑터</strong>.<br>
+  • <strong>평판 사이즈</strong>: A4 (210×297mm) 정도면 충분. MDF나 아크릴판 추천.
+</div>
+
+</body>
+</html>
