@@ -167,6 +167,7 @@ REQ_TH    = make_read(0x01, 0x0000, 2)
 REQ_SOIL  = make_read(0x02, 0x0000, 7)
 REQ_SOLAR = make_read(0x03, 0x0000, 1)
 REQ_CO2   = make_read(0x04, 0x0000, 1, fc=0x04)
+REQ_NUTRI = make_read(0x05, 0x0000, 8)
 
 # ── 메인 ─────────────────────────────────────────────
 print("=== Hunet 통합 센서 시작 (Pico) ===")
@@ -196,6 +197,10 @@ while True:
     resp_co2   = read_sensor(REQ_CO2, 450)
     
     check_display_command()
+    time.sleep_ms(50)
+    resp_nutri = read_sensor(REQ_NUTRI, 400)
+    
+    check_display_command()
 
     data = {}
 
@@ -217,6 +222,20 @@ while True:
 
     if resp_co2 and len(resp_co2) >= 5:
         data['co2'] = (resp_co2[3] << 8) | resp_co2[4]
+
+    if resp_nutri and len(resp_nutri) >= 19:
+        data['nutri_ph']        = ((resp_nutri[3] << 8) | resp_nutri[4]) / 100.0
+        data['nutri_temp']      = ((resp_nutri[5] << 8) | resp_nutri[6]) / 10.0
+        data['nutri_ec']        = (resp_nutri[7] << 8) | resp_nutri[8]
+        data['nutri_tds']       = (resp_nutri[9] << 8) | resp_nutri[10]
+        data['nutri_salinity']  = (resp_nutri[11] << 8) | resp_nutri[12]
+        
+        orp_raw = (resp_nutri[13] << 8) | resp_nutri[14]
+        if orp_raw & 0x8000: orp_raw -= 0x10000
+        data['nutri_orp']       = orp_raw
+        
+        data['nutri_turbidity'] = ((resp_nutri[15] << 8) | resp_nutri[16]) / 10.0
+        data['nutri_do']        = ((resp_nutri[17] << 8) | resp_nutri[18]) / 100.0
 
     print(data)
     send_to_display(data)  # 전송 후 릴레이 명령도 수신

@@ -433,12 +433,12 @@ RS485 sensors -> Pico -> UART -> RP2350 LCD
 
 ### 완료된 작업
 
-#### RP2350 Touch LCD 4 LVGL 대시보드 구현 ✅
+#### RP2350 Touch LCD 4 LVGL 대시보드 구현 완료
 - `examples/hunet_dashboard/hunet_dashboard.c` 신규 작성
 - `examples/hunet_dashboard/CMakeLists.txt` 신규 작성
 - `examples/CMakeLists.txt`에 `add_subdirectory(hunet_dashboard)` 한 줄 추가
 
-#### I2C 통신 핀 문제 해결 ✅
+#### I2C 통신 핀 문제 해결 완료
 - 최초 계획: I2C0 GP8/GP9 슬레이브 → RS485 커넥터 뒤에 트랜시버 칩 있어서 직접 접근 불가
 - 보드의 "SDA/SCL" 레이블 커넥터 = I2C1 GP6/GP7 (터치·IMU 전용)
 - **해결**: 슬레이브를 I2C1(GP6/GP7)로 변경, `bsp_i2c_init()` / `lv_port_indev_init()` 제거 (터치 비활성화)
@@ -475,7 +475,7 @@ RS485 sensors -> Pico -> UART -> RP2350 LCD
 
 ### 완료된 작업
 
-#### RP2350 Touch LCD 4 빌드 환경 세팅 ✅
+#### RP2350 Touch LCD 4 빌드 환경 세팅 완료
 - cmake 설치 (brew)
 - ARM GNU 툴체인 설치 (gcc-arm-embedded cask) — 심볼릭링크 오류 발생했지만 실제 바이너리는 정상 설치됨
   - 경로: `/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/bin/`
@@ -483,14 +483,14 @@ RS485 sensors -> Pico -> UART -> RP2350 LCD
 - `~/.zshrc`에 PATH, PICO_SDK_PATH 영구 등록
 - `cmake .. && make -j8` 성공 → `.uf2` 18종 빌드 완료
 
-#### 전체 센서 파이프라인 동작 확인 ✅
+#### 전체 센서 파이프라인 동작 확인 완료
 - `firmware/check_rs485_sensors.py`로 센서 4종 응답 전부 확인
   - 0x01 온습도 OK / 0x02 토양 OK / 0x03 조도 OK / 0x04 CO2 OK
 - `firmware/rp2040_main.py` → 보드 `main.py`로 업로드
 - W5500 DHCP + PHY 링크 정상
 - Pico → W5500 → Pi `192.168.100.30:8080/sensor` HTTP POST → MariaDB INSERT 5초 주기 확인
 
-#### 라즈베리파이 게이트웨이 systemd 등록 ✅
+#### 라즈베리파이 게이트웨이 systemd 등록 완료
 - `/etc/systemd/system/hunet-gateway.service` 생성
 - `After=network-online.target` — 네트워크 올라온 후 시작
 - `Restart=always`, `RestartSec=5` — 크래시 시 자동 재시작
@@ -508,7 +508,7 @@ RS485 sensors -> Pico -> UART -> RP2350 LCD
 | 대시보드 | http://192.168.100.30:8080/ |
 | MariaDB | 49.247.214.116:3306 / smart_chamber / sensor_readings |
 
-#### W5500 자동 재연결 로직 추가 ✅
+#### W5500 자동 재연결 로직 추가 완료
 - 문제: Pi 재부팅 시 Pico W5500 소켓이 꼬여서 `HTTP POST: FAIL` 반복 → 수동 리셋 필요했음
 - 해결: `fail_count` 카운터 추가, 3회 연속 실패 시 `init_network()` 재호출로 W5500 재초기화
 - 이제 Pi 재부팅돼도 Pico가 약 15~20초 내 자동 복구
@@ -795,7 +795,7 @@ cd /Users/choeingyumac/Hunet
 
 ### 완료된 작업
 
-#### 조도(일사량) 센서 연결 ✅ (3번째 센서)
+#### 조도(일사량) 센서 연결 완료 (3번째 센서)
 - 모델: PR-300AL-RA-N01 (전원 DC 7~30V → 12V SMPS 사용)
 - 설정 레지스터 토양센서와 동일 (0x07D1 baud, 0x07D0 addr)
 - baud 4800 → 9600, addr 0x01 → 0x03 변경 완료
@@ -803,7 +803,7 @@ cd /Users/choeingyumac/Hunet
 - 전용 펌웨어: `firmware/rp2040_solar.py`
 - 통합 펌웨어 및 웹 대시보드 Solar 카드 추가
 
-#### 3개 센서 통합 완료 ✅
+#### 3개 센서 통합 완료
 - 온습도(0x01) + 토양(0x02) + 조도(0x03) 동일 RS485 버스
 - 출력 포맷: `AirTemp:X | Humidity:X% || Moisture:X% | SoilTemp:X | EC:X | pH:X | N:X P:X K:X || Solar:X W/m2`
 - 웹 대시보드 전체 항목(10개) 실시간 표시 확인
@@ -828,21 +828,21 @@ cd /Users/choeingyumac/Hunet
 
 ---
 
-#### 토양 센서 baud rate 9600 영구 변경 ✅
+#### 토양 센서 baud rate 9600 영구 변경 완료
 - 레지스터 `0x07D1` (설정 레지스터) 발견 — 데이터시트 입수로 해결
 - 인코딩: `0x0000`=2400 / `0x0001`=4800 / `0x0002`=9600
 - 명령: `01 06 07 D1 00 02 59 46` → 전원 재시작 후 영구 적용
 - 삽질 기록: 0x0007(살리니티 데이터 레지스터)을 baud 레지스터로 착각하고 여러 번 write 시도했으나 실패. 데이터시트 확인 후 0x07D1이 정확한 주소임을 확인
 
-#### 토양 센서 Modbus 주소 0x01 → 0x02 변경 ✅
+#### 토양 센서 Modbus 주소 0x01 → 0x02 변경 완료
 - 레지스터 `0x07D0` (Slave ID 레지스터)
 - 명령: `01 06 07 D0 00 02 08 86`
 
-#### 두 센서 RS485 버스 통합 ✅
+#### 두 센서 RS485 버스 통합 완료
 - 온습도(addr=0x01, 9600) + 토양(addr=0x02, 9600) 같은 A/B 버스에 병렬 연결
 - `firmware/rp2040_main.py` → 통합 펌웨어로 교체
 
-#### 웹 대시보드 전면 개편 ✅
+#### 웹 대시보드 전면 개편 완료
 - 9개 항목 카드: AirTemp / Humidity / Moisture / SoilTemp / EC / pH / N / P / K
 - 실시간 차트: 4개 라인 (AirTemp, Humidity, Moisture, SoilTemp)
 - Regex 파싱: `AirTemp:X | Humidity:X% || Moisture:X% | SoilTemp:X | EC:X | pH:X | N:X P:X K:X`
@@ -882,7 +882,7 @@ cd /Users/choeingyumac/Hunet
 #### 웹 대시보드 버그 수정
 - `web_monitor.py` JS 코드 안에 Python 문법(`True/False`) → `true/false` 수정
 
-#### 온습도 센서 ✅ 완료
+#### 온습도 센서 완료
 - RS485 Modbus RTU 통신 성공
 - **Baud Rate: 9600 / 주소: 0x01**
 - 레지스터 0x0000 = 습도, 0x0001 = 온도
@@ -908,3 +908,12 @@ cd /Users/choeingyumac/Hunet
 | 센서 GND | 공통 GND |
 | 센서 A | 모듈 A |
 | 센서 B | 모듈 B |
+
+### 2026-05-15: 양액 8-in-1 센서 (CWT-MS8-S) 추가
+- **배경:** 양액 수질 모니터링을 위해 8개 데이터를 한 번에 제공하는 센서 추가 요청.
+- **수행 내용:**
+  - `SENSORS.md`에 Slave ID 0x05 할당 및 레지스터 맵(pH, 수온, EC, TDS, 염도, ORP, 탁도, DO) 정리.
+  - `firmware/pico/main.py`에 8개 레지스터 동시 읽기(`REQ_NUTRI`) 및 파싱 로직 추가.
+  - `gateway_server.py`의 DB INSERT SQL 및 대시보드 테이블 레이아웃 업데이트.
+  - `setup_sensor_db.py`에 8개 신규 컬럼 DDL 추가.
+- **데이터 변환:** pH(/100), 수온(/10), 탁도(/10), DO(/100) 스케일링 적용. ORP는 부호 있는 정수로 처리.

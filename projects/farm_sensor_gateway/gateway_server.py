@@ -33,6 +33,14 @@ INSERT INTO sensor_readings (
     k,
     solar,
     co2,
+    nutri_ph,
+    nutri_temp,
+    nutri_ec,
+    nutri_tds,
+    nutri_salinity,
+    nutri_orp,
+    nutri_turbidity,
+    nutri_do,
     relay,
     raw_json
 ) VALUES (
@@ -48,6 +56,14 @@ INSERT INTO sensor_readings (
     %(k)s,
     %(solar)s,
     %(co2)s,
+    %(nutri_ph)s,
+    %(nutri_temp)s,
+    %(nutri_ec)s,
+    %(nutri_tds)s,
+    %(nutri_salinity)s,
+    %(nutri_orp)s,
+    %(nutri_turbidity)s,
+    %(nutri_do)s,
     %(relay)s,
     %(raw_json)s
 )
@@ -69,6 +85,14 @@ SELECT
     k,
     solar,
     co2,
+    nutri_ph,
+    nutri_temp,
+    nutri_ec,
+    nutri_tds,
+    nutri_salinity,
+    nutri_orp,
+    nutri_turbidity,
+    nutri_do,
     relay
 FROM sensor_readings
 ORDER BY id DESC
@@ -150,6 +174,14 @@ INDEX_HTML = """<!doctype html>
       ["ec", "EC", ""],
       ["solar", "조도", "W/m²"],
       ["co2", "CO₂", "ppm"],
+      ["nutri_ph", "양액 pH", ""],
+      ["nutri_temp", "양액 수온", "°C"],
+      ["nutri_ec", "양액 EC", "μS/cm"],
+      ["nutri_tds", "양액 TDS", "mg/L"],
+      ["nutri_salinity", "양액 염도", "mg/L"],
+      ["nutri_orp", "양액 ORP", "mV"],
+      ["nutri_turbidity", "양액 탁도", "NTU"],
+      ["nutri_do", "양액 DO", "mg/L"],
       ["relay", "릴레이", ""]
     ];
 
@@ -184,7 +216,9 @@ INDEX_HTML = """<!doctype html>
             <tr>
               <th>ID</th><th>시간</th><th>장치</th><th>공기온도</th><th>습도</th>
               <th>토양수분</th><th>토양온도</th><th>EC</th><th>pH</th>
-              <th>N</th><th>P</th><th>K</th><th>조도</th><th>CO₂</th><th>릴레이</th>
+              <th>N</th><th>P</th><th>K</th><th>조도</th><th>CO₂</th>
+              <th>양액pH</th><th>양액수온</th><th>양액EC</th><th>양액TDS</th>
+              <th>염도</th><th>ORP</th><th>탁도</th><th>DO</th><th>릴레이</th>
             </tr>
           </thead>
           <tbody>
@@ -204,6 +238,14 @@ INDEX_HTML = """<!doctype html>
                 <td>${valueText(row.k)}</td>
                 <td>${valueText(row.solar)}</td>
                 <td>${valueText(row.co2)}</td>
+                <td>${valueText(row.nutri_ph)}</td>
+                <td>${valueText(row.nutri_temp)}</td>
+                <td>${valueText(row.nutri_ec)}</td>
+                <td>${valueText(row.nutri_tds)}</td>
+                <td>${valueText(row.nutri_salinity)}</td>
+                <td>${valueText(row.nutri_orp)}</td>
+                <td>${valueText(row.nutri_turbidity)}</td>
+                <td>${valueText(row.nutri_do)}</td>
                 <td>${valueText(row.relay)}</td>
               </tr>
             `).join("")}
@@ -275,6 +317,14 @@ def insert_sensor_reading(data):
         "k": number_or_none(data, "k"),
         "solar": number_or_none(data, "solar"),
         "co2": number_or_none(data, "co2"),
+        "nutri_ph": number_or_none(data, "nutri_ph"),
+        "nutri_temp": number_or_none(data, "nutri_temp"),
+        "nutri_ec": number_or_none(data, "nutri_ec"),
+        "nutri_tds": number_or_none(data, "nutri_tds"),
+        "nutri_salinity": number_or_none(data, "nutri_salinity"),
+        "nutri_orp": number_or_none(data, "nutri_orp"),
+        "nutri_turbidity": number_or_none(data, "nutri_turbidity"),
+        "nutri_do": number_or_none(data, "nutri_do"),
         "relay": number_or_none(data, "relay"),
         "raw_json": json.dumps(data, ensure_ascii=False, separators=(",", ":")),
     }
